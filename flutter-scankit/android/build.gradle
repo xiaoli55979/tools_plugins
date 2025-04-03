@@ -1,0 +1,49 @@
+group 'xyz.bczl.flutter_scankit'
+version '1.0'
+
+buildscript {
+    repositories {
+        google()
+        jcenter()
+        maven {url 'https://developer.huawei.com/repo/'}
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.4.2'
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        google()
+        jcenter()
+        maven {url 'https://developer.huawei.com/repo/'}
+    }
+}
+
+apply plugin: 'com.android.library'
+
+android {
+    namespace "com.example.flutter_scankit"
+    compileSdkVersion 34
+
+    defaultConfig {
+        minSdkVersion 21
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            options.compilerArgs << "-Xlint:deprecation" << "-Xlint:unchecked"
+        }
+    }
+}
+
+dependencies {
+    //scankit SDK
+    implementation 'com.huawei.hms:scanplus:2.11.0.300'
+}
