@@ -1,7 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
 export "FLUTTER_ROOT=/Users/ahao/fvm/versions/stable"
-export "FLUTTER_APPLICATION_PATH=/Users/ahao/Documents/Workspace/flutter/plugins/line_detection_plugin"
+export "FLUTTER_APPLICATION_PATH=/Users/ahao/Documents/Workspace/im_project_github/tools_plugins/line_detection_plugin"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_TARGET=lib/main.dart"
 export "FLUTTER_BUILD_DIR=build"

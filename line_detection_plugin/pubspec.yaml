@@ -12,12 +12,13 @@ dependencies:
     sdk: flutter
   plugin_platform_interface: ^2.0.2
 
-  flutter_httpdns:
-      path: ../flutter_httpdns
 #  flutter_httpdns:
-#    git:
-#      url: https://glok33.com/mobile/plugins/flutter_httpdns.git
-#      ref: master
+#      path: ../flutter_httpdns
+  flutter_httpdns:
+    git:
+      url: https://github.com/xiaoli55979/tools_plugins.git
+      ref: main
+      path: flutter_httpdns
   dio: ^5.3.3
   sentry_flutter: ^8.6.0
   sentry_dio: ^8.6.0
