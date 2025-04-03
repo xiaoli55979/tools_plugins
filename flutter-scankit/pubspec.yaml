@@ -13,11 +13,16 @@ dependencies:
 #  image_picker: ^1.0.7 # image_picker
 #  image_picker: # device info
 #    path: ../image_picker/image_picker
+#  image_picker:
+#    git:
+#      url: https://glok33.com/mobile/plugins/image_picker.git
+#      ref: main
+#      path: image_picker
   image_picker:
     git:
-      url: https://glok33.com/mobile/plugins/image_picker.git
+      url: https://github.com/xiaoli55979/tools_plugins.git
       ref: main
-      path: image_picker
+      path: image_picker/image_picker
 dev_dependencies:
   flutter_test:
     sdk: flutter
