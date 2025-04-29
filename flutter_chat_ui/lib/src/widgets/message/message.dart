@@ -70,10 +70,10 @@ class Message extends StatelessWidget {
   /// if the message is a part of a group (messages are grouped when written
   /// in quick succession by the same author).
   final Widget Function(
-    Widget child, {
-    required types.Message message,
-    required bool nextMessageInGroup,
-  })? bubbleBuilder;
+      Widget child, {
+      required types.Message message,
+      required bool nextMessageInGroup,
+      })? bubbleBuilder;
 
   /// Determine the alignment of the bubble for RTL languages. Has no effect
   /// for the LTR languages.
@@ -104,9 +104,9 @@ class Message extends StatelessWidget {
 
   /// See [Chat.imageProviderBuilder].
   final ImageProvider Function({
-    required String uri,
-    required Map<String, String>? imageHeaders,
-    required Conditional conditional,
+  required String uri,
+  required Map<String, String>? imageHeaders,
+  required Conditional conditional,
   })? imageProviderBuilder;
 
   /// Any message type.
@@ -165,10 +165,10 @@ class Message extends StatelessWidget {
 
   /// Build a text message inside predefined bubble.
   final Widget Function(
-    types.TextMessage, {
-    required int messageWidth,
-    required bool showName,
-  })? textMessageBuilder;
+      types.TextMessage, {
+      required int messageWidth,
+      required bool showName,
+      })? textMessageBuilder;
 
   /// See [TextMessage.options].
   final TextMessageOptions textMessageOptions;
@@ -182,42 +182,44 @@ class Message extends StatelessWidget {
   /// Build an audio message inside predefined bubble.
   final Widget Function(types.VideoMessage, {required int messageWidth})? videoMessageBuilder;
 
+  Widget _selectBuilder() => Icon(Icons.check_box, weight: 20,);
+
   Widget _avatarBuilder() => showAvatar
       ? avatarBuilder?.call(message.author) ??
-          UserAvatar(
-            author: message.author,
-            bubbleRtlAlignment: bubbleRtlAlignment,
-            imageHeaders: imageHeaders,
-            onAvatarTap: onAvatarTap,
-          )
+      UserAvatar(
+        author: message.author,
+        bubbleRtlAlignment: bubbleRtlAlignment,
+        imageHeaders: imageHeaders,
+        onAvatarTap: onAvatarTap,
+      )
       : const SizedBox(width: 40);
 
   Widget _bubbleBuilder(
-    BuildContext context,
-    BorderRadius borderRadius,
-    bool currentUserIsAuthor,
-    bool enlargeEmojis,
-  ) {
+      BuildContext context,
+      BorderRadius borderRadius,
+      bool currentUserIsAuthor,
+      bool enlargeEmojis,
+      ) {
     final defaultMessage = (enlargeEmojis && hideBackgroundOnEmojiMessages)
         ? _messageBuilder()
         : Container(
-            decoration: BoxDecoration(
-              borderRadius: borderRadius,
-              color: !currentUserIsAuthor || message.type == types.MessageType.image
-                  ? InheritedChatTheme.of(context).theme.secondaryColor
-                  : InheritedChatTheme.of(context).theme.primaryColor,
-            ),
-            child: ClipRRect(
-              borderRadius: borderRadius,
-              child: _messageBuilder(),
-            ),
-          );
+      decoration: BoxDecoration(
+        borderRadius: borderRadius,
+        color: !currentUserIsAuthor || message.type == types.MessageType.image
+            ? InheritedChatTheme.of(context).theme.secondaryColor
+            : InheritedChatTheme.of(context).theme.primaryColor,
+      ),
+      child: ClipRRect(
+        borderRadius: borderRadius,
+        child: _messageBuilder(),
+      ),
+    );
     return bubbleBuilder != null
         ? bubbleBuilder!(
-            _messageBuilder(),
-            message: message,
-            nextMessageInGroup: roundBorder,
-          )
+      _messageBuilder(),
+      message: message,
+      nextMessageInGroup: roundBorder,
+    )
         : defaultMessage;
   }
 
@@ -239,30 +241,30 @@ class Message extends StatelessWidget {
         return imageMessageBuilder != null
             ? imageMessageBuilder!(imageMessage, messageWidth: messageWidth)
             : ImageMessage(
-                imageHeaders: imageHeaders,
-                imageProviderBuilder: imageProviderBuilder,
-                message: imageMessage,
-                messageWidth: messageWidth,
-              );
+          imageHeaders: imageHeaders,
+          imageProviderBuilder: imageProviderBuilder,
+          message: imageMessage,
+          messageWidth: messageWidth,
+        );
       case types.MessageType.text:
         final textMessage = message as types.TextMessage;
         return textMessageBuilder != null
             ? textMessageBuilder!(
-                textMessage,
-                messageWidth: messageWidth,
-                showName: showName,
-              )
+          textMessage,
+          messageWidth: messageWidth,
+          showName: showName,
+        )
             : TextMessage(
-                emojiEnlargementBehavior: emojiEnlargementBehavior,
-                hideBackgroundOnEmojiMessages: hideBackgroundOnEmojiMessages,
-                message: textMessage,
-                nameBuilder: nameBuilder,
-                onPreviewDataFetched: onPreviewDataFetched,
-                options: textMessageOptions,
-                showName: showName,
-                usePreviewData: usePreviewData,
-                userAgent: userAgent,
-              );
+          emojiEnlargementBehavior: emojiEnlargementBehavior,
+          hideBackgroundOnEmojiMessages: hideBackgroundOnEmojiMessages,
+          message: textMessage,
+          nameBuilder: nameBuilder,
+          onPreviewDataFetched: onPreviewDataFetched,
+          options: textMessageOptions,
+          showName: showName,
+          usePreviewData: usePreviewData,
+          userAgent: userAgent,
+        );
       case types.MessageType.video:
         final videoMessage = message as types.VideoMessage;
         return videoMessageBuilder != null ? videoMessageBuilder!(videoMessage, messageWidth: messageWidth) : const SizedBox();
@@ -272,8 +274,8 @@ class Message extends StatelessWidget {
   }
 
   Widget _statusIcon(
-    BuildContext context,
-  ) {
+      BuildContext context,
+      ) {
     if (!showStatus) return const SizedBox.shrink();
 
     return Padding(
@@ -300,58 +302,60 @@ class Message extends StatelessWidget {
     final messageBorderRadius = InheritedChatTheme.of(context).theme.messageBorderRadius;
     final borderRadius = bubbleRtlAlignment == BubbleRtlAlignment.left
         ? BorderRadiusDirectional.only(
-            bottomEnd: Radius.circular(
-              !currentUserIsAuthor || roundBorder ? messageBorderRadius : 0,
-            ),
-            bottomStart: Radius.circular(
-              currentUserIsAuthor || roundBorder ? messageBorderRadius : 0,
-            ),
-            topEnd: Radius.circular(messageBorderRadius),
-            topStart: Radius.circular(messageBorderRadius),
-          )
+      bottomEnd: Radius.circular(
+        !currentUserIsAuthor || roundBorder ? messageBorderRadius : 0,
+      ),
+      bottomStart: Radius.circular(
+        currentUserIsAuthor || roundBorder ? messageBorderRadius : 0,
+      ),
+      topEnd: Radius.circular(messageBorderRadius),
+      topStart: Radius.circular(messageBorderRadius),
+    )
         : BorderRadius.only(
-            bottomLeft: Radius.circular(
-              currentUserIsAuthor || roundBorder ? messageBorderRadius : 0,
-            ),
-            bottomRight: Radius.circular(
-              !currentUserIsAuthor || roundBorder ? messageBorderRadius : 0,
-            ),
-            topLeft: Radius.circular(messageBorderRadius),
-            topRight: Radius.circular(messageBorderRadius),
-          );
+      bottomLeft: Radius.circular(
+        currentUserIsAuthor || roundBorder ? messageBorderRadius : 0,
+      ),
+      bottomRight: Radius.circular(
+        !currentUserIsAuthor || roundBorder ? messageBorderRadius : 0,
+      ),
+      topLeft: Radius.circular(messageBorderRadius),
+      topRight: Radius.circular(messageBorderRadius),
+    );
 
     final bubbleMargin = InheritedChatTheme.of(context).theme.bubbleMargin ??
         (bubbleRtlAlignment == BubbleRtlAlignment.left
             ? EdgeInsetsDirectional.only(
-                bottom: 4,
-                end: isMobile ? query.padding.right : 0,
-                start: 20 + (isMobile ? query.padding.left : 0),
-              )
+          bottom: 4,
+          end: isMobile ? query.padding.right : 0,
+          start: 20 + (isMobile ? query.padding.left : 0),
+        )
             : EdgeInsets.only(
-                bottom: 4,
-                left: 20 + (isMobile ? query.padding.left : 0),
-                right: isMobile ? query.padding.right : 0,
-              ));
+          bottom: 4,
+          left: 20 + (isMobile ? query.padding.left : 0),
+          right: isMobile ? query.padding.right : 0,
+        ));
 
     return Container(
       alignment: bubbleRtlAlignment == BubbleRtlAlignment.left
           ? currentUserIsAuthor
-              ? AlignmentDirectional.centerEnd
-              : AlignmentDirectional.centerStart
+          ? AlignmentDirectional.centerEnd
+          : AlignmentDirectional.centerStart
           : currentUserIsAuthor
-              ? Alignment.centerRight
-              : Alignment.centerLeft,
+          ? Alignment.centerRight
+          : Alignment.centerLeft,
       margin: bubbleMargin,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
         textDirection: bubbleRtlAlignment == BubbleRtlAlignment.left ? null : TextDirection.ltr,
         children: [
+          _selectBuilder(),
+          Spacer(),
           if (!currentUserIsAuthor && showUserAvatars) _avatarBuilder(),
           // if (currentUserIsAuthor && isLeftStatus) _statusIcon(context),
           ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: messageWidth.toDouble(),
+              // maxWidth: messageWidth.toDouble(),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -362,29 +366,30 @@ class Message extends StatelessWidget {
                   onTap: () => onMessageTap?.call(context, message),
                   child: onMessageVisibilityChanged != null
                       ? VisibilityDetector(
-                          key: Key(message.id),
-                          onVisibilityChanged: (visibilityInfo) => onMessageVisibilityChanged!(
-                            message,
-                            visibilityInfo.visibleFraction > 0.1,
-                          ),
-                          child: _bubbleBuilder(
-                            context,
-                            borderRadius.resolve(Directionality.of(context)),
-                            currentUserIsAuthor,
-                            enlargeEmojis,
-                          ),
-                        )
+                    key: Key(message.id),
+                    onVisibilityChanged: (visibilityInfo) => onMessageVisibilityChanged!(
+                      message,
+                      visibilityInfo.visibleFraction > 0.1,
+                    ),
+                    child: _bubbleBuilder(
+                      context,
+                      borderRadius.resolve(Directionality.of(context)),
+                      currentUserIsAuthor,
+                      enlargeEmojis,
+                    ),
+                  )
                       : _bubbleBuilder(
-                          context,
-                          borderRadius.resolve(Directionality.of(context)),
-                          currentUserIsAuthor,
-                          enlargeEmojis,
-                        ),
+                    context,
+                    borderRadius.resolve(Directionality.of(context)),
+                    currentUserIsAuthor,
+                    enlargeEmojis,
+                  ),
                 ),
               ],
             ),
           ),
-          if (!currentUserIsAuthor && showUserAvatars) _avatarBuilder(),
+          if (currentUserIsAuthor && showUserAvatars)
+            _avatarBuilder(),
           // if (currentUserIsAuthor && !isLeftStatus) _statusIcon(context),
         ],
       ),
