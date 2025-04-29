@@ -390,6 +390,7 @@ class Message extends StatelessWidget {
           ),
           if (currentUserIsAuthor && showUserAvatars)
             _avatarBuilder(),
+          const Text("test")
           // if (currentUserIsAuthor && !isLeftStatus) _statusIcon(context),
         ],
       ),
