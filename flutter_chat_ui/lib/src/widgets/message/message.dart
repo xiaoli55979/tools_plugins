@@ -1,3 +1,5 @@
+// import 'dart:nativewrappers/_internal/vm/lib/ffi_allocation_patch.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:visibility_detector/visibility_detector.dart';
@@ -19,7 +21,7 @@ import 'user_avatar.dart';
 /// a nice look on larger screens.
 class Message extends StatelessWidget {
   /// Creates a particular message from any message type.
-  const Message({
+  Message({
     super.key,
     this.audioMessageBuilder,
     this.avatarBuilder,
@@ -55,14 +57,25 @@ class Message extends StatelessWidget {
     required this.usePreviewData,
     this.userAgent,
     this.videoMessageBuilder,
+    this.isMultipleSelect = false,
+    this.isSelected = false,
+    this.onMultipleTap,
+    this.onSelectTap,
   });
+
+  final VoidCallback? onMultipleTap;
+  // final VoidCallback? onSelectMultipleTap;
+  final void Function(types.User)? onSelectTap;
+  bool isMultipleSelect; /// 是否多选.
+
+  bool isSelected; /// 是否选中
 
   /// Build an audio message inside predefined bubble.
   final Widget Function(types.AudioMessage, {required int messageWidth})? audioMessageBuilder;
 
   /// This is to allow custom user avatar builder
   /// By using this we can fetch newest user info based on id.
-  final Widget Function(types.User author)? avatarBuilder;
+  final Widget Function(types.User author, bool isMultipleSelect, types.Message msg)? avatarBuilder;
 
   /// Customize the default bubble using this function. `child` is a content
   /// you should render inside your bubble, `message` is a current message
@@ -182,15 +195,16 @@ class Message extends StatelessWidget {
   /// Build an audio message inside predefined bubble.
   final Widget Function(types.VideoMessage, {required int messageWidth})? videoMessageBuilder;
 
-  Widget _selectBuilder() => Icon(Icons.check_box, weight: 20,);
+  Widget _selectBuilder() => Icon(isSelected ? Icons.check_box : Icons.check_box_outlined, weight: 20,);
 
   Widget _avatarBuilder() => showAvatar
-      ? avatarBuilder?.call(message.author) ??
+      ? avatarBuilder?.call(message.author, isMultipleSelect, message) ??
       UserAvatar(
         author: message.author,
         bubbleRtlAlignment: bubbleRtlAlignment,
         imageHeaders: imageHeaders,
-        onAvatarTap: onAvatarTap,
+        isMultipleSelect: isMultipleSelect,
+        onAvatarTap: !isMultipleSelect ? onAvatarTap : onSelectTap,
       )
       : const SizedBox(width: 40);
 
@@ -302,24 +316,24 @@ class Message extends StatelessWidget {
     final messageBorderRadius = InheritedChatTheme.of(context).theme.messageBorderRadius;
     final borderRadius = bubbleRtlAlignment == BubbleRtlAlignment.left
         ? BorderRadiusDirectional.only(
-      bottomEnd: Radius.circular(
+      topEnd: Radius.circular(
         !currentUserIsAuthor || roundBorder ? messageBorderRadius : 0,
       ),
-      bottomStart: Radius.circular(
+      topStart: Radius.circular(
         currentUserIsAuthor || roundBorder ? messageBorderRadius : 0,
       ),
-      topEnd: Radius.circular(messageBorderRadius),
-      topStart: Radius.circular(messageBorderRadius),
+      bottomEnd: Radius.circular(messageBorderRadius),
+      bottomStart: Radius.circular(messageBorderRadius),
     )
         : BorderRadius.only(
-      bottomLeft: Radius.circular(
+      topLeft: Radius.circular(
         currentUserIsAuthor || roundBorder ? messageBorderRadius : 0,
       ),
-      bottomRight: Radius.circular(
+      topRight: Radius.circular(
         !currentUserIsAuthor || roundBorder ? messageBorderRadius : 0,
       ),
-      topLeft: Radius.circular(messageBorderRadius),
-      topRight: Radius.circular(messageBorderRadius),
+      bottomLeft: Radius.circular(messageBorderRadius),
+      bottomRight: Radius.circular(messageBorderRadius),
     );
 
     final bubbleMargin = InheritedChatTheme.of(context).theme.bubbleMargin ??
@@ -335,64 +349,89 @@ class Message extends StatelessWidget {
           right: isMobile ? query.padding.right : 0,
         ));
 
-    return Container(
-      alignment: bubbleRtlAlignment == BubbleRtlAlignment.left
-          ? currentUserIsAuthor
-          ? AlignmentDirectional.centerEnd
-          : AlignmentDirectional.centerStart
-          : currentUserIsAuthor
-          ? Alignment.centerRight
-          : Alignment.centerLeft,
-      margin: bubbleMargin,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
-        textDirection: bubbleRtlAlignment == BubbleRtlAlignment.left ? null : TextDirection.ltr,
-        children: [
-          _selectBuilder(),
-          Spacer(),
-          if (!currentUserIsAuthor && showUserAvatars) _avatarBuilder(),
-          // if (currentUserIsAuthor && isLeftStatus) _statusIcon(context),
-          ConstrainedBox(
-            constraints: BoxConstraints(
-              // maxWidth: messageWidth.toDouble(),
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        FocusManager.instance.primaryFocus?.unfocus();
+        print("辣子最外层");
+        onSelectTap?.call(message.author);
+      },
+      child: Container(
+        alignment: bubbleRtlAlignment == BubbleRtlAlignment.left
+            ? currentUserIsAuthor
+            ? AlignmentDirectional.centerEnd
+            : AlignmentDirectional.centerStart
+            : currentUserIsAuthor
+            ? Alignment.centerRight
+            : Alignment.centerLeft,
+        margin: bubbleMargin,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          textDirection: bubbleRtlAlignment == BubbleRtlAlignment.left ? null : TextDirection.ltr,
+          children: [
+            Center(
+              child: Visibility(
+                visible: isMultipleSelect,
+                child: Icon(isSelected ? Icons.check_box : Icons.check_box_outlined, weight: 20,),
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                GestureDetector(
-                  onDoubleTap: () => onMessageDoubleTap?.call(context, message),
-                  onLongPressStart: (LongPressStartDetails details) => onMessageLongPress?.call(context, message, details),
-                  onTap: () => onMessageTap?.call(context, message),
-                  child: onMessageVisibilityChanged != null
-                      ? VisibilityDetector(
-                    key: Key(message.id),
-                    onVisibilityChanged: (visibilityInfo) => onMessageVisibilityChanged!(
-                      message,
-                      visibilityInfo.visibleFraction > 0.1,
-                    ),
-                    child: _bubbleBuilder(
+            const Spacer(),
+            // if(!currentUserIsAuthor)
+            //   Text("已读",
+            //     style: TextStyle(color: Colors.red, fontSize: 12),
+            //   ),
+            if (!currentUserIsAuthor && showUserAvatars) _avatarBuilder(),
+            // if (currentUserIsAuthor && isLeftStatus) _statusIcon(context),
+            ConstrainedBox(
+              constraints: const BoxConstraints(
+                // maxWidth: messageWidth.toDouble(),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  const SizedBox(height: 10,),
+                  GestureDetector(
+                    onDoubleTap: () => onMessageDoubleTap?.call(context, message),
+                    onLongPressStart: (LongPressStartDetails details) => onMessageLongPress?.call(context, message, details),
+                    onTap: () {
+                      FocusManager.instance.primaryFocus?.unfocus();
+                      if (!isMultipleSelect) {
+                        onMessageTap?.call(context, message);
+                      } else {
+                        onSelectTap?.call(message.author);
+                      }
+                    },
+                    child: onMessageVisibilityChanged != null
+                        ? VisibilityDetector(
+                      key: Key(message.id),
+                      onVisibilityChanged: (visibilityInfo) => onMessageVisibilityChanged!(
+                        message,
+                        visibilityInfo.visibleFraction > 0.1,
+                      ),
+                      child: _bubbleBuilder(
+                        context,
+                        borderRadius.resolve(Directionality.of(context)),
+                        currentUserIsAuthor,
+                        enlargeEmojis,
+                      ),
+                    )
+                        : _bubbleBuilder(
                       context,
                       borderRadius.resolve(Directionality.of(context)),
                       currentUserIsAuthor,
                       enlargeEmojis,
                     ),
-                  )
-                      : _bubbleBuilder(
-                    context,
-                    borderRadius.resolve(Directionality.of(context)),
-                    currentUserIsAuthor,
-                    enlargeEmojis,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          if (currentUserIsAuthor && showUserAvatars)
+            if (currentUserIsAuthor && showUserAvatars)
+              SizedBox(width: 10,),
             _avatarBuilder(),
-          const Text("test")
-          // if (currentUserIsAuthor && !isLeftStatus) _statusIcon(context),
-        ],
+            // if (currentUserIsAuthor && !isLeftStatus) _statusIcon(context),
+          ],
+        ),
       ),
     );
   }

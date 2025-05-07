@@ -235,7 +235,7 @@ class _ChatPageState extends State<ChatPage> {
           onSendPressed: _handleSendPressed,
           showUserAvatars: true,
           showUserNames: true,
-          user: _user,
+          user: _user, didSelectedMsgs: [], didSelectedMsgsFun: (List<Message> ) {  },
         ),
       );
 }

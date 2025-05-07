@@ -9,13 +9,17 @@ import '../state/inherited_chat_theme.dart';
 /// Renders user's avatar or initials next to a message.
 class UserAvatar extends StatelessWidget {
   /// Creates user avatar.
-  const UserAvatar({
+  UserAvatar({
     super.key,
     required this.author,
     this.bubbleRtlAlignment,
     this.imageHeaders,
     this.onAvatarTap,
+    this.isMultipleSelect = false,
+    this.onSelectMultipleTap,
   });
+  final void Function(types.User)? onSelectMultipleTap;
+  bool isMultipleSelect;
 
   /// Author to show image and name initials from.
   final types.User author;
@@ -43,26 +47,26 @@ class UserAvatar extends StatelessWidget {
           ? const EdgeInsetsDirectional.only(end: 8)
           : const EdgeInsets.only(right: 8),
       child: GestureDetector(
-        onTap: () => onAvatarTap?.call(author),
+        onTap: () => !isMultipleSelect ? onAvatarTap?.call(author) : onSelectMultipleTap?.call(author),
         child: CircleAvatar(
           backgroundColor: hasImage
               ? InheritedChatTheme.of(context)
-                  .theme
-                  .userAvatarImageBackgroundColor
+              .theme
+              .userAvatarImageBackgroundColor
               : color,
           backgroundImage: hasImage
               ? Conditional().getProvider(
-                  author.imageUrl!,
-                  headers: imageHeaders,
-                )
+            author.imageUrl!,
+            headers: imageHeaders,
+          )
               : null,
           radius: 16,
           child: !hasImage
               ? Text(
-                  initials,
-                  style:
-                      InheritedChatTheme.of(context).theme.userAvatarTextStyle,
-                )
+            initials,
+            style:
+            InheritedChatTheme.of(context).theme.userAvatarTextStyle,
+          )
               : null,
         ),
       ),
