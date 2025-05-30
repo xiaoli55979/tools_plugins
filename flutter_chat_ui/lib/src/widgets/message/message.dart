@@ -382,7 +382,6 @@ class Message extends StatelessWidget {
             //     style: TextStyle(color: Colors.red, fontSize: 12),
             //   ),
             if (!currentUserIsAuthor && showUserAvatars) _avatarBuilder(),
-            // if (currentUserIsAuthor && isLeftStatus) _statusIcon(context),
             ConstrainedBox(
               constraints: const BoxConstraints(
                 // maxWidth: messageWidth.toDouble(),
@@ -429,7 +428,19 @@ class Message extends StatelessWidget {
             if (currentUserIsAuthor && showUserAvatars)
               SizedBox(width: 10,),
             _avatarBuilder(),
-            // if (currentUserIsAuthor && !isLeftStatus) _statusIcon(context),
+            // if (currentUserIsAuthor && !isLeftStatus)
+            //   Column(
+            //     children: [
+            //       SizedBox(height: 30,),
+            //       Container(
+            //         color: Colors.red,
+            //         child: Align(
+            //           alignment: Alignment.bottomRight,
+            //           child: _statusIcon(context),
+            //         ),
+            //       ),
+            //     ],
+            //   ),
           ],
         ),
       ),
