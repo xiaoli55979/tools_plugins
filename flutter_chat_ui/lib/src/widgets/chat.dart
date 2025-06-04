@@ -19,6 +19,7 @@ import '../util.dart';
 import 'chat_list.dart';
 import 'image_gallery.dart';
 import 'input/input.dart';
+import 'input/options/chat_input_options.dart';
 import 'message/message.dart';
 import 'message/system_message.dart';
 import 'message/text_message.dart';
@@ -64,7 +65,7 @@ class Chat extends StatefulWidget {
     this.imageHeaders,
     this.imageMessageBuilder,
     this.imageProviderBuilder,
-    this.inputOptions = const InputOptions(),
+    this.inputOptions = const ChatInputOptions(),
     this.isAttachmentUploading,
     this.isLastPage,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
@@ -112,6 +113,7 @@ class Chat extends StatefulWidget {
     required this.didSelectedMsgs,
     required this.didSelectedMsgsFun,
   });
+
   final void Function(List<types.Message>) didSelectedMsgsFun;
   List<types.Message> didSelectedMsgs;
   final void Function(types.Message)? selectedMsg;
@@ -119,17 +121,20 @@ class Chat extends StatefulWidget {
   bool isMultipleSelect;
 
   /// See [Message.audioMessageBuilder].
-  final Widget Function(types.AudioMessage, {required int messageWidth})? audioMessageBuilder;
+  final Widget Function(types.AudioMessage, {required int messageWidth})?
+      audioMessageBuilder;
 
   /// See [Message.avatarBuilder].
-  final Widget Function(types.User author, bool isMultipleSelect, types.Message msg)? avatarBuilder;
+  final Widget Function(
+          types.User author, bool isMultipleSelect, types.Message msg)?
+      avatarBuilder;
 
   /// See [Message.bubbleBuilder].
   final Widget Function(
-      Widget child, {
-      required types.Message message,
-      required bool nextMessageInGroup,
-      })? bubbleBuilder;
+    Widget child, {
+    required types.Message message,
+    required bool nextMessageInGroup,
+  })? bubbleBuilder;
 
   /// 是否显示加载历史消息按钮.
   final TopConfigOption topConfig;
@@ -147,10 +152,12 @@ class Chat extends StatefulWidget {
   final String Function(DateTime)? customDateHeaderText;
 
   /// See [Message.customMessageBuilder].
-  final Widget Function(types.CustomMessage, {required int messageWidth})? customMessageBuilder;
+  final Widget Function(types.CustomMessage, {required int messageWidth})?
+      customMessageBuilder;
 
   /// See [Message.customStatusBuilder].
-  final Widget Function(types.Message message, {required BuildContext context})? customStatusBuilder;
+  final Widget Function(types.Message message, {required BuildContext context})?
+      customStatusBuilder;
 
   /// Allows you to customize the date format. IMPORTANT: only for the date, do not return time here. See [timeFormat] to customize the time format. [dateLocale] will be ignored if you use this, so if you want a localized date make sure you initialize your [DateFormat] with a locale. See [customDateHeaderText] for more customization.
   final DateFormat? dateFormat;
@@ -184,7 +191,8 @@ class Chat extends StatefulWidget {
   final Widget? emptyState;
 
   /// See [Message.fileMessageBuilder].
-  final Widget Function(types.FileMessage, {required int messageWidth})? fileMessageBuilder;
+  final Widget Function(types.FileMessage, {required int messageWidth})?
+      fileMessageBuilder;
 
   /// Time (in ms) between two messages when we will visually group them.
   /// Default value is 1 minute, 60000 ms. When time between two messages
@@ -201,20 +209,21 @@ class Chat extends StatefulWidget {
   final Map<String, String>? imageHeaders;
 
   /// See [Message.imageMessageBuilder].
-  final Widget Function(types.ImageMessage, {required int messageWidth})? imageMessageBuilder;
+  final Widget Function(types.ImageMessage, {required int messageWidth})?
+      imageMessageBuilder;
 
   /// This feature allows you to use a custom image provider.
   /// This is useful if you want to manage image loading yourself, or if you need to cache images.
   /// You can also use the `cached_network_image` feature, but when it comes to caching, you might want to decide on a per-message basis.
   /// Plus, by using this provider, you can choose whether or not to send specific headers based on the URL.
   final ImageProvider Function({
-  required String uri,
-  required Map<String, String>? imageHeaders,
-  required Conditional conditional,
+    required String uri,
+    required Map<String, String>? imageHeaders,
+    required Conditional conditional,
   })? imageProviderBuilder;
 
   /// See [Input.options].
-  final InputOptions inputOptions;
+  final ChatInputOptions inputOptions;
 
   /// See [Input.isAttachmentUploading].
   final bool? isAttachmentUploading;
@@ -259,10 +268,13 @@ class Chat extends StatefulWidget {
   final void Function(BuildContext context, types.Message)? onMessageDoubleTap;
 
   /// See [Message.onMessageLongPress].
-  final void Function(BuildContext context, types.Message, LongPressStartDetails details)? onMessageLongPress;
+  final void Function(
+          BuildContext context, types.Message, LongPressStartDetails details)?
+      onMessageLongPress;
 
   /// See [Message.onMessageStatusLongPress].
-  final void Function(BuildContext context, types.Message)? onMessageStatusLongPress;
+  final void Function(BuildContext context, types.Message)?
+      onMessageStatusLongPress;
 
   /// See [Message.onMessageStatusTap].
   final void Function(BuildContext context, types.Message)? onMessageStatusTap;
@@ -274,7 +286,8 @@ class Chat extends StatefulWidget {
   final void Function(types.Message, bool visible)? onMessageVisibilityChanged;
 
   /// See [Message.onPreviewDataFetched].
-  final void Function(types.TextMessage, types.PreviewData)? onPreviewDataFetched;
+  final void Function(types.TextMessage, types.PreviewData)?
+      onPreviewDataFetched;
 
   /// See [Input.onSendPressed].
   final void Function(types.PartialText) onSendPressed;
@@ -301,10 +314,10 @@ class Chat extends StatefulWidget {
 
   /// See [Message.textMessageBuilder].
   final Widget Function(
-      types.TextMessage, {
-      required int messageWidth,
-      required bool showName,
-      })? textMessageBuilder;
+    types.TextMessage, {
+    required int messageWidth,
+    required bool showName,
+  })? textMessageBuilder;
 
   /// See [Message.textMessageOptions].
   final TextMessageOptions textMessageOptions;
@@ -333,10 +346,12 @@ class Chat extends StatefulWidget {
   final bool? useTopSafeAreaInset;
 
   /// See [Message.videoMessageBuilder].
-  final Widget Function(types.VideoMessage, {required int messageWidth})? videoMessageBuilder;
+  final Widget Function(types.VideoMessage, {required int messageWidth})?
+      videoMessageBuilder;
 
   /// See [Message.slidableMessageBuilder].
-  final Widget Function(types.Message, Widget msgWidget)? slidableMessageBuilder;
+  final Widget Function(types.Message, Widget msgWidget)?
+      slidableMessageBuilder;
 
   /// See [Message.isLeftStatus].
   /// If true, status will be shown on the left side of the message.
@@ -386,12 +401,12 @@ class ChatState extends State<Chat> {
 
   /// Scroll to the message with the specified [id].
   void scrollToMessage(
-      String id, {
-        Duration? scrollDuration,
-        bool withHighlight = false,
-        Duration? highlightDuration,
-        AutoScrollPosition? preferPosition,
-      }) async {
+    String id, {
+    Duration? scrollDuration,
+    bool withHighlight = false,
+    Duration? highlightDuration,
+    AutoScrollPosition? preferPosition,
+  }) async {
     await _scrollController.scrollToIndex(
       chatMessageAutoScrollIndexById[id]!,
       duration: scrollDuration ?? scrollAnimationDuration,
@@ -406,28 +421,31 @@ class ChatState extends State<Chat> {
   }
 
   /// Highlight the message with the specified [id].
-  void highlightMessage(String id, {Duration? duration}) => _scrollController.highlight(
-    chatMessageAutoScrollIndexById[id]!,
-    highlightDuration: duration ?? const Duration(seconds: 3),
-  );
+  void highlightMessage(String id, {Duration? duration}) =>
+      _scrollController.highlight(
+        chatMessageAutoScrollIndexById[id]!,
+        highlightDuration: duration ?? const Duration(seconds: 3),
+      );
 
   Widget _emptyStateBuilder() =>
       widget.emptyState ??
-          Container(
-            alignment: Alignment.center,
-            margin: const EdgeInsets.symmetric(
-              horizontal: 24,
-            ),
-            child: Text(
-              widget.l10n.emptyChatPlaceholder,
-              style: widget.theme.emptyChatPlaceholderTextStyle,
-              textAlign: TextAlign.center,
-            ),
-          );
+      Container(
+        alignment: Alignment.center,
+        margin: const EdgeInsets.symmetric(
+          horizontal: 24,
+        ),
+        child: Text(
+          widget.l10n.emptyChatPlaceholder,
+          style: widget.theme.emptyChatPlaceholderTextStyle,
+          textAlign: TextAlign.center,
+        ),
+      );
 
   /// Only scroll to first unread if there are messages and it is the first open.
   void _maybeScrollToFirstUnread() {
-    if (widget.scrollToUnreadOptions.scrollOnOpen && _chatMessages.isNotEmpty && !_hadScrolledToUnreadOnOpen) {
+    if (widget.scrollToUnreadOptions.scrollOnOpen &&
+        _chatMessages.isNotEmpty &&
+        !_hadScrolledToUnreadOnOpen) {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (mounted) {
           await Future.delayed(widget.scrollToUnreadOptions.scrollDelay);
@@ -440,9 +458,7 @@ class ChatState extends State<Chat> {
 
   /// We need the index for auto scrolling because it will scroll until it reaches an index higher or equal that what it is scrolling towards. Index will be null for removed messages. Can just set to -1 for auto scroll.
   Widget _messageBuilder(
-      Object object,
-      BoxConstraints constraints,
-      int? index) {
+      Object object, BoxConstraints constraints, int? index) {
     if (object is DateHeader) {
       return widget.dateHeaderBuilder?.call(object) ??
           Container(
@@ -477,15 +493,18 @@ class ChatState extends State<Chat> {
       final Widget messageWidget;
 
       if (message is types.SystemMessage) {
-        messageWidget = widget.systemMessageBuilder?.call(message) ?? SystemMessage(message: message.text);
+        messageWidget = widget.systemMessageBuilder?.call(message) ??
+            SystemMessage(message: message.text);
       } else {
         final maxWidth = widget.theme.messageMaxWidth;
-        final messageWidth = widget.showUserAvatars && message.author.id != widget.user.id
-            ? min(constraints.maxWidth * widget.messageWidthRatio, maxWidth).floor()
-            : min(
-          constraints.maxWidth * (widget.messageWidthRatio + 0.06),
-          maxWidth,
-        ).floor();
+        final messageWidth =
+            widget.showUserAvatars && message.author.id != widget.user.id
+                ? min(constraints.maxWidth * widget.messageWidthRatio, maxWidth)
+                    .floor()
+                : min(
+                    constraints.maxWidth * (widget.messageWidthRatio + 0.06),
+                    maxWidth,
+                  ).floor();
         final Widget msgWidget = Message(
           onMultipleTap: () {
             setState(() {
@@ -531,7 +550,8 @@ class ChatState extends State<Chat> {
           onMessageStatusLongPress: widget.onMessageStatusLongPress,
           onMessageStatusTap: widget.onMessageStatusTap,
           onMessageTap: (context, tappedMessage) {
-            if (tappedMessage is types.ImageMessage && widget.disableImageGallery != true) {
+            if (tappedMessage is types.ImageMessage &&
+                widget.disableImageGallery != true) {
               _onImagePressed(tappedMessage);
             }
 
@@ -551,7 +571,9 @@ class ChatState extends State<Chat> {
           userAgent: widget.userAgent,
           videoMessageBuilder: widget.videoMessageBuilder,
         );
-        messageWidget = widget.slidableMessageBuilder == null ? msgWidget : widget.slidableMessageBuilder!(message, msgWidget);
+        messageWidget = widget.slidableMessageBuilder == null
+            ? msgWidget
+            : widget.slidableMessageBuilder!(message, msgWidget);
       }
 
       return AutoScrollTag(
@@ -574,7 +596,7 @@ class ChatState extends State<Chat> {
 
   void _onImagePressed(types.ImageMessage message) {
     final initialPage = _gallery.indexWhere(
-          (element) => element.id == message.id && element.uri == message.uri,
+      (element) => element.id == message.id && element.uri == message.uri,
     );
     _galleryPageController = PageController(initialPage: initialPage);
     setState(() {
@@ -583,9 +605,9 @@ class ChatState extends State<Chat> {
   }
 
   void _onPreviewDataFetched(
-      types.TextMessage message,
-      types.PreviewData previewData,
-      ) {
+    types.TextMessage message,
+    types.PreviewData previewData,
+  ) {
     widget.onPreviewDataFetched?.call(message, previewData);
   }
 
@@ -628,7 +650,6 @@ class ChatState extends State<Chat> {
 
       _refreshAutoScrollMapping();
       _maybeScrollToFirstUnread();
-
     }
   }
 
@@ -641,104 +662,108 @@ class ChatState extends State<Chat> {
 
   @override
   Widget build(BuildContext context) => InheritedUser(
-    user: widget.user,
-    child: InheritedChatTheme(
-      theme: widget.theme,
-      child: InheritedL10n(
-        l10n: widget.l10n,
-        child: Stack(
-          children: [
-            Container(
-              color: widget.theme.backgroundColor,
-              child: Column(
-                children: [
-                  if (widget.topConfig.showHistory)
-                    Container(
-                      padding: widget.topConfig.padding,
-                      color: Colors.transparent,
-                      child: widget.topConfig.loading
-                          ? SizedBox(
-                        width: 20.0,
-                        height: 20.0,
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(widget.topConfig.loadingColor),
+        user: widget.user,
+        child: InheritedChatTheme(
+          theme: widget.theme,
+          child: InheritedL10n(
+            l10n: widget.l10n,
+            child: Stack(
+              children: [
+                Container(
+                  color: widget.theme.backgroundColor,
+                  child: Column(
+                    children: [
+                      if (widget.topConfig.showHistory)
+                        Container(
+                          padding: widget.topConfig.padding,
+                          color: Colors.transparent,
+                          child: widget.topConfig.loading
+                              ? SizedBox(
+                                  width: 20.0,
+                                  height: 20.0,
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        widget.topConfig.loadingColor),
+                                  ),
+                                )
+                              : SizedBox(
+                                  height: widget.topConfig.height,
+                                  child: TextButton(
+                                    onPressed: () {
+                                      widget.topTapCallBack?.call();
+                                      if (widget.topConfig.scroToTop) {
+                                        _scrollController.jumpTo(0.0);
+                                      }
+                                    },
+                                    style: TextButton.styleFrom(
+                                      padding: EdgeInsets.zero,
+                                      minimumSize: Size(0, 0),
+                                    ),
+                                    child: widget.topConfig.content,
+                                  ),
+                                ),
                         ),
-                      )
-                          : SizedBox(
-                        height: widget.topConfig.height,
-                        child: TextButton(
-                          onPressed: () {
-                            widget.topTapCallBack?.call();
-                            if (widget.topConfig.scroToTop) {
-                              _scrollController.jumpTo(0.0);
-                            }
-                          },
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: Size(0, 0),
-                          ),
-                          child: widget.topConfig.content,
-                        ),
-                      ),
-                    ),
-                  Flexible(
-                    child: widget.messages.isEmpty
-                        ? SizedBox.expand(
-                      child: _emptyStateBuilder(),
-                    )
-                        : GestureDetector(
-                      onTap: () {
-                        FocusManager.instance.primaryFocus?.unfocus();
-                        widget.onBackgroundTap?.call();
-                      },
-                      child: LayoutBuilder(
-                        builder: (
-                            BuildContext context,
-                            BoxConstraints constraints,
-                            ) =>
-                            ChatList(
-                              bottomWidget: widget.listBottomWidget,
-                              bubbleRtlAlignment: widget.bubbleRtlAlignment!,
-                              isLastPage: widget.isLastPage,
-                              itemBuilder: (Object item, int? index) => _messageBuilder(
-                                  item,
-                                  constraints,
-                                  index
+                      Flexible(
+                        child: widget.messages.isEmpty
+                            ? SizedBox.expand(
+                                child: _emptyStateBuilder(),
+                              )
+                            : GestureDetector(
+                                onTap: () {
+                                  FocusManager.instance.primaryFocus?.unfocus();
+                                  widget.onBackgroundTap?.call();
+                                },
+                                child: LayoutBuilder(
+                                  builder: (
+                                    BuildContext context,
+                                    BoxConstraints constraints,
+                                  ) =>
+                                      ChatList(
+                                    bottomWidget: widget.listBottomWidget,
+                                    bubbleRtlAlignment:
+                                        widget.bubbleRtlAlignment!,
+                                    isLastPage: widget.isLastPage,
+                                    itemBuilder: (Object item, int? index) =>
+                                        _messageBuilder(
+                                            item, constraints, index),
+                                    items: _chatMessages,
+                                    keyboardDismissBehavior:
+                                        widget.keyboardDismissBehavior,
+                                    onEndReached: widget.onEndReached,
+                                    onEndReachedThreshold:
+                                        widget.onEndReachedThreshold,
+                                    scrollController: _scrollController,
+                                    scrollPhysics: widget.scrollPhysics,
+                                    typingIndicatorOptions:
+                                        widget.typingIndicatorOptions,
+                                    useTopSafeAreaInset:
+                                        widget.useTopSafeAreaInset ?? isMobile,
+                                  ),
+                                ),
                               ),
-                              items: _chatMessages,
-                              keyboardDismissBehavior: widget.keyboardDismissBehavior,
-                              onEndReached: widget.onEndReached,
-                              onEndReachedThreshold: widget.onEndReachedThreshold,
-                              scrollController: _scrollController,
-                              scrollPhysics: widget.scrollPhysics,
-                              typingIndicatorOptions: widget.typingIndicatorOptions,
-                              useTopSafeAreaInset: widget.useTopSafeAreaInset ?? isMobile,
-                            ),
                       ),
-                    ),
+                      widget.customBottomWidget ??
+                          Input(
+                            isAttachmentUploading: widget.isAttachmentUploading,
+                            onAttachmentPressed: widget.onAttachmentPressed,
+                            onSendPressed: widget.onSendPressed,
+                            options: widget.inputOptions,
+                          ),
+                    ],
                   ),
-                  widget.customBottomWidget ??
-                      Input(
-                        isAttachmentUploading: widget.isAttachmentUploading,
-                        onAttachmentPressed: widget.onAttachmentPressed,
-                        onSendPressed: widget.onSendPressed,
-                        options: widget.inputOptions,
-                      ),
-                ],
-              ),
+                ),
+                if (_isImageViewVisible)
+                  ImageGallery(
+                    imageHeaders: widget.imageHeaders,
+                    imageProviderBuilder: widget.imageProviderBuilder,
+                    images: _gallery,
+                    pageController: _galleryPageController!,
+                    onClosePressed: _onCloseGalleryPressed,
+                    options: widget.imageGalleryOptions,
+                  ),
+              ],
             ),
-            if (_isImageViewVisible)
-              ImageGallery(
-                imageHeaders: widget.imageHeaders,
-                imageProviderBuilder: widget.imageProviderBuilder,
-                images: _gallery,
-                pageController: _galleryPageController!,
-                onClosePressed: _onCloseGalleryPressed,
-                options: widget.imageGalleryOptions,
-              ),
-          ],
+          ),
         ),
-      ),
-    ),
-  );
+      );
 }
