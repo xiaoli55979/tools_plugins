@@ -3,13 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
-import '../../models/input_clear_mode.dart';
-import '../../models/send_button_visibility_mode.dart';
 import '../../util.dart';
 import '../state/inherited_chat_theme.dart';
 import '../state/inherited_l10n.dart';
 import 'attachment_button.dart';
 import 'input_text_field_controller.dart';
+import 'options/chat_input_options.dart';
 import 'send_button.dart';
 
 /// A class that represents bottom bar widget with a text field, attachment and
@@ -22,7 +21,7 @@ class Input extends StatefulWidget {
     this.onAttachmentPressed,
     this.onAttachmentPressedIndex,
     required this.onSendPressed,
-    this.options = const InputOptions(),
+    this.options = const ChatInputOptions(),
   });
 
   /// Whether attachment is uploading. Will replace attachment button with a
@@ -40,7 +39,7 @@ class Input extends StatefulWidget {
   final void Function(types.PartialText) onSendPressed;
 
   /// Customisation options for the [Input].
-  final InputOptions options;
+  final ChatInputOptions options;
 
   @override
   State<Input> createState() => _InputState();
@@ -83,9 +82,9 @@ class _InputState extends State<Input> {
 
   void _handleSendButtonVisibilityModeChange() {
     _textController.removeListener(_handleTextControllerChange);
-    if (widget.options.sendButtonVisibilityMode == SendButtonVisibilityMode.hidden) {
+    if (widget.options.sendButtonShowMode == SendButtonShowMode.hidden) {
       _sendButtonVisible = false;
-    } else if (widget.options.sendButtonVisibilityMode == SendButtonVisibilityMode.editing) {
+    } else if (widget.options.sendButtonShowMode == SendButtonShowMode.editing) {
       _sendButtonVisible = _textController.text.trim() != '';
       _textController.addListener(_handleTextControllerChange);
     } else {
@@ -99,7 +98,7 @@ class _InputState extends State<Input> {
       final partialText = types.PartialText(text: trimmedText);
       widget.onSendPressed(partialText);
 
-      if (widget.options.inputClearMode == InputClearMode.always) {
+      if (widget.options.inputClearMode == ChatInputClearMode.always) {
         _textController.clear();
       }
     }
@@ -204,7 +203,7 @@ class _InputState extends State<Input> {
   @override
   void didUpdateWidget(covariant Input oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.options.sendButtonVisibilityMode != oldWidget.options.sendButtonVisibilityMode) {
+    if (widget.options.sendButtonShowMode != oldWidget.options.sendButtonShowMode) {
       _handleSendButtonVisibilityModeChange();
     }
   }
@@ -221,61 +220,4 @@ class _InputState extends State<Input> {
         onTap: () => _inputFocusNode.requestFocus(),
         child: _inputBuilder(),
       );
-}
-
-@immutable
-class InputOptions {
-  const InputOptions({
-    this.inputClearMode = InputClearMode.always,
-    this.keyboardType = TextInputType.multiline,
-    this.onTextChanged,
-    this.onTextFieldTap,
-    this.sendButtonVisibilityMode = SendButtonVisibilityMode.editing,
-    this.textEditingController,
-    this.autocorrect = true,
-    this.autofocus = false,
-    this.enableSuggestions = true,
-    this.enabled = true,
-    this.usesSafeArea = true,
-  });
-
-  /// Controls the [Input] clear behavior. Defaults to [InputClearMode.always].
-  final InputClearMode inputClearMode;
-
-  /// Controls the [Input] keyboard type. Defaults to [TextInputType.multiline].
-  final TextInputType keyboardType;
-
-  /// Will be called whenever the text inside [TextField] changes.
-  final void Function(String)? onTextChanged;
-
-  /// Will be called on [TextField] tap.
-  final VoidCallback? onTextFieldTap;
-
-  /// Controls the visibility behavior of the [SendButton] based on the
-  /// [TextField] state inside the [Input] widget.
-  /// Defaults to [SendButtonVisibilityMode.editing].
-  final SendButtonVisibilityMode sendButtonVisibilityMode;
-
-  /// Custom [TextEditingController]. If not provided, defaults to the
-  /// [InputTextFieldController], which extends [TextEditingController] and has
-  /// additional fatures like markdown support. If you want to keep additional
-  /// features but still need some methods from the default [TextEditingController],
-  /// you can create your own [InputTextFieldController] (imported from this lib)
-  /// and pass it here.
-  final TextEditingController? textEditingController;
-
-  /// Controls the [TextInput] autocorrect behavior. Defaults to [true].
-  final bool autocorrect;
-
-  /// Whether [TextInput] should have focus. Defaults to [false].
-  final bool autofocus;
-
-  /// Controls the [TextInput] enableSuggestions behavior. Defaults to [true].
-  final bool enableSuggestions;
-
-  /// Controls the [TextInput] enabled behavior. Defaults to [true].
-  final bool enabled;
-
-  /// Controls the [Input] usesSafeArea behavior. Defaults to [true].
-  final bool usesSafeArea;
 }
