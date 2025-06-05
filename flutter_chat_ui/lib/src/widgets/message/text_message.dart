@@ -3,7 +3,7 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_link_previewer/flutter_link_previewer.dart' show LinkPreview, regexLink;
 import 'package:flutter_parsed_text/flutter_parsed_text.dart';
 
-import '../../models/emoji_enlargement_behavior.dart';
+import '../../options/emoji_enlargement_behavior.dart';
 import '../../models/matchers.dart';
 import '../../models/pattern_style.dart';
 import '../../util.dart';

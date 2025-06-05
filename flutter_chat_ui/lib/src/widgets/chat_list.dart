@@ -2,7 +2,7 @@ import 'package:diffutil_dart/diffutil.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
-import '../models/bubble_rtl_alignment.dart';
+import '../options/bubble_rtl_alignment.dart';
 import 'state/inherited_chat_theme.dart';
 import 'state/inherited_user.dart';
 import 'typing_indicator.dart';
@@ -271,27 +271,23 @@ class _ChatListState extends State<ChatList>
             SliverPadding(
               padding: const EdgeInsets.only(bottom: 4),
               sliver: SliverToBoxAdapter(
-                child: (widget.typingIndicatorOptions!.typingUsers.isNotEmpty &&
-                        !_indicatorOnScrollStatus)
-                    ? (widget.typingIndicatorOptions
-                                ?.customTypingIndicatorBuilder !=
-                            null
-                        ? widget.typingIndicatorOptions!
-                            .customTypingIndicatorBuilder!(
+                child: (widget.typingIndicatorOptions!.typingUsers.isNotEmpty && !_indicatorOnScrollStatus)
+                    ? (widget.typingIndicatorOptions?.customTypingIndicatorBuilder != null
+                        ? widget.typingIndicatorOptions!.customTypingIndicatorBuilder!(
                             context: context,
                             bubbleAlignment: widget.bubbleRtlAlignment,
                             options: widget.typingIndicatorOptions!,
                             indicatorOnScrollStatus: _indicatorOnScrollStatus,
                           )
-                        : widget.typingIndicatorOptions
-                                ?.customTypingIndicator ??
+                        : widget.typingIndicatorOptions?.customTypingIndicator ??
                             TypingIndicator(
                               bubbleAlignment: widget.bubbleRtlAlignment,
                               options: widget.typingIndicatorOptions!,
                               showIndicator: (widget.typingIndicatorOptions!
                                       .typingUsers.isNotEmpty &&
                                   !_indicatorOnScrollStatus),
-                            ))
+                            )
+                    )
                     : const SizedBox.shrink(),
               ),
             ),
@@ -317,8 +313,7 @@ class _ChatListState extends State<ChatList>
             ),
             SliverPadding(
               padding: EdgeInsets.only(
-                top: 16 +
-                    (widget.useTopSafeAreaInset
+                top: 16 + (widget.useTopSafeAreaInset
                         ? MediaQuery.of(context).padding.top
                         : 0),
               ),

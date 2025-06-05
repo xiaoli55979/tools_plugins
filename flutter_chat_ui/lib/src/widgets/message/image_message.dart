@@ -6,10 +6,9 @@ import '../../util.dart';
 import '../state/inherited_chat_theme.dart';
 import '../state/inherited_user.dart';
 
-/// A class that represents image message widget. Supports different
-/// aspect ratios, renders blurred image as a background which is visible
-/// if the image is narrow, renders image in form of a file if aspect
-/// ratio is very small or very big.
+typedef ImageProviderBuilder = ImageProvider Function({required String uri, required Map<String, String>? imageHeaders, required Conditional conditional});
+
+///默认图片消息样式
 class ImageMessage extends StatefulWidget {
   /// Creates an image message widget based on [types.ImageMessage].
   const ImageMessage({
@@ -23,12 +22,7 @@ class ImageMessage extends StatefulWidget {
   /// See [Chat.imageHeaders].
   final Map<String, String>? imageHeaders;
 
-  /// See [Chat.imageProviderBuilder].
-  final ImageProvider Function({
-    required String uri,
-    required Map<String, String>? imageHeaders,
-    required Conditional conditional,
-  })? imageProviderBuilder;
+  final ImageProviderBuilder? imageProviderBuilder;
 
   /// [types.ImageMessage].
   final types.ImageMessage message;
