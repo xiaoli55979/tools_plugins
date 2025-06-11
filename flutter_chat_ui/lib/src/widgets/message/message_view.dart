@@ -386,7 +386,7 @@ class MessageView extends StatelessWidget {
                 ),
               ),
             ),
-            const Spacer(),
+            // const Spacer(),
             if (!currentUserIsAuthor && showUserAvatars) _avatarBuilder(),
             ConstrainedBox(
               constraints: const BoxConstraints(
@@ -436,6 +436,7 @@ class MessageView extends StatelessWidget {
               const SizedBox(
                 width: 10,
               ),
+            if (currentUserIsAuthor && showUserAvatars)
             _avatarBuilder(),
             // if (currentUserIsAuthor && !isLeftStatus)
             //   Column(
