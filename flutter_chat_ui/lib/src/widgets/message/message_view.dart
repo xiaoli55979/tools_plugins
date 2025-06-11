@@ -194,16 +194,18 @@ class MessageView extends StatelessWidget {
   /// 是否选中.
   bool isSelected;
 
-  Widget _avatarBuilder() => showAvatar
-      ? avatarBuilder?.call(message.author, isMultipleSelect, message) ??
+  Widget _avatarBuilder() =>
+      // showAvatar
+      // ?
+      avatarBuilder?.call(message.author, isMultipleSelect, message) ??
           UserAvatar(
             author: message.author,
             bubbleRtlAlignment: bubbleRtlAlignment,
             imageHeaders: imageHeaders,
             isMultipleSelect: isMultipleSelect,
             onAvatarTap: !isMultipleSelect ? onAvatarTap : onSelectTap,
-          )
-      : const SizedBox(width: 40);
+          );
+      // : const SizedBox(width: 40);
 
   Widget _bubbleBuilder(
     BuildContext context,
