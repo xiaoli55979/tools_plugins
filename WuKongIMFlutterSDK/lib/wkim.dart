@@ -6,6 +6,7 @@ import 'package:wukongimfluttersdk/manager/cmd_manager.dart';
 import 'package:wukongimfluttersdk/manager/conversation_manager.dart';
 import 'package:wukongimfluttersdk/manager/message_manager.dart';
 import 'package:wukongimfluttersdk/manager/reminder_manager.dart';
+import 'package:wukongimfluttersdk/model/wk_file_content.dart';
 import 'package:wukongimfluttersdk/model/wk_image_content.dart';
 import 'package:wukongimfluttersdk/model/wk_text_content.dart';
 import 'package:wukongimfluttersdk/model/wk_video_content.dart';
@@ -55,6 +56,13 @@ class WKIM {
         0,
       ).decodeJson(data);
     });
+    messageManager.registerMsgContent(WkMessageContentType.image,
+            (dynamic data) {
+          return WKFileContent(
+            '',
+            0,
+          ).decodeJson(data);
+        });
     messageManager.registerMsgContent(WkMessageContentType.voice,
         (dynamic data) {
       return WKVoiceContent(

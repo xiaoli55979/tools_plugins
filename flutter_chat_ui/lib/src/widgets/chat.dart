@@ -82,7 +82,6 @@ class Chat extends StatefulWidget {
     this.topConfig = const TopConfigOption(),
     this.topTapCallBack,
     this.selectedMsg,
-    this.showUserAvatars = false,
     this.isLeftStatus = false,
     this.textMessageOptions = const TextMessageOptions(),
     this.usePreviewData = true,
@@ -210,8 +209,7 @@ class Chat extends StatefulWidget {
   /// Controls if and how the chat should scroll to the newest unread message.
   final ScrollToUnreadOptions scrollToUnreadOptions;
 
-  /// Show user names for received messages. Useful for a group chat. Will be
-  /// shown only on text messages.
+  /// 接收的消息是否显示名称，仅针对textMessage.
   final bool showUserNames;
 
   /// 系统消息构造器.
@@ -235,9 +233,6 @@ class Chat extends StatefulWidget {
 
   /// Width ratio for message bubble.
   final double messageWidthRatio;
-
-  /// 是否显示头像. 默认false
-  final bool showUserAvatars;
 
   /// 状态消息在左侧还是右侧，默认false.
   final bool isLeftStatus;
@@ -461,7 +456,7 @@ class ChatState extends State<Chat> {
       } else {
         final maxWidth = widget.theme.messageMaxWidth;
         final messageWidth =
-            widget.showUserAvatars && message.author.id != widget.user.id
+            message.author.id != widget.user.id
                 ? min(constraints.maxWidth * widget.messageWidthRatio, maxWidth)
                     .floor()
                 : min(
@@ -471,9 +466,6 @@ class ChatState extends State<Chat> {
         final Widget msgWidget = MessageView(
           message: message,
           messageWidth: messageWidth,
-          roundBorder: map['nextMessageInGroup'] == true,
-          showUserAvatars: widget.showUserAvatars,
-          showAvatar: map['nextMessageInGroup'] == false,
           showName: map['showName'] == true,
           showStatus: map['showStatus'] == true,
           isLeftStatus: widget.isLeftStatus,

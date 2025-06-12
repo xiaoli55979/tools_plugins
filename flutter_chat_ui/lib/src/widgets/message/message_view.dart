@@ -12,9 +12,10 @@ import 'image_message.dart';
 import 'message_status.dart';
 import 'text_message.dart';
 import 'user_avatar.dart';
+import 'user_name.dart';
 
 /*消息外部包裹樣式、头像、名称、消息状态构造器*/
-typedef BubbleBuilder = Widget Function(Widget child, {required types.Message message, required bool nextMessageInGroup});
+typedef BubbleBuilder = Widget Function(Widget child, {required types.Message message});
 typedef AvatarBuilder = Widget Function(types.User author, bool isMultipleSelect, types.Message msg);
 typedef NameBuilder = Widget Function(types.User);
 typedef CustomStatusBuilder = Widget Function(types.Message message, {required BuildContext context});
@@ -45,9 +46,6 @@ class MessageView extends StatelessWidget {
     super.key,
     required this.message,
     required this.messageWidth,
-    required this.roundBorder,
-    required this.showUserAvatars,
-    required this.showAvatar,
     required this.showName,
     required this.showStatus,
     required this.isLeftStatus,
@@ -88,15 +86,6 @@ class MessageView extends StatelessWidget {
 
   /// 最大消息宽度.
   final int messageWidth;
-
-  /// 消息是否圆角.
-  final bool roundBorder;
-
-  /// 是否显示头像. 默认false
-  final bool showUserAvatars;
-
-  /// 是否显示头像. ps：false时，有默认占位.
-  final bool showAvatar;
 
   /// 是否显示名称.
   final bool showName;
@@ -195,8 +184,6 @@ class MessageView extends StatelessWidget {
   bool isSelected;
 
   Widget _avatarBuilder() =>
-      // showAvatar
-      // ?
       avatarBuilder?.call(message.author, isMultipleSelect, message) ??
           UserAvatar(
             author: message.author,
@@ -205,23 +192,22 @@ class MessageView extends StatelessWidget {
             isMultipleSelect: isMultipleSelect,
             onAvatarTap: !isMultipleSelect ? onAvatarTap : onSelectTap,
           );
-      // : const SizedBox(width: 40);
 
   Widget _bubbleBuilder(
-    BuildContext context,
-    BorderRadius borderRadius,
-    bool currentUserIsAuthor,
-    bool enlargeEmojis,
-  ) {
+      BuildContext context,
+      BorderRadius borderRadius,
+      bool currentUserIsAuthor,
+      bool enlargeEmojis,
+      ) {
     final defaultMessage = (enlargeEmojis && hideBackgroundOnEmojiMessages)
         ? _messageBuilder()
         : Container(
             decoration: BoxDecoration(
               borderRadius: borderRadius,
               color: !currentUserIsAuthor ||
-                      message.type == types.MessageType.image
-                  ? InheritedChatTheme.of(context).theme.secondaryColor
-                  : InheritedChatTheme.of(context).theme.primaryColor,
+                  message.type == types.MessageType.image
+                  ? Colors.white
+                  : const Color(0xff2FBC63),
             ),
             child: ClipRRect(
               borderRadius: borderRadius,
@@ -232,7 +218,6 @@ class MessageView extends StatelessWidget {
         ? bubbleBuilder!(
             _messageBuilder(),
             message: message,
-            nextMessageInGroup: roundBorder,
           )
         : defaultMessage;
   }
@@ -279,7 +264,6 @@ class MessageView extends StatelessWidget {
                 nameBuilder: nameBuilder,
                 onPreviewDataFetched: onPreviewDataFetched,
                 options: textMessageOptions,
-                showName: showName,
                 usePreviewData: usePreviewData,
                 userAgent: userAgent,
               );
@@ -313,9 +297,7 @@ class MessageView extends StatelessWidget {
     final query = MediaQuery.of(context);
     final user = InheritedUser.of(context).user;
     final currentUserIsAuthor = user.id == message.author.id;
-    final enlargeEmojis =
-        emojiEnlargementBehavior != EmojiEnlargementBehavior.never &&
-            message is types.TextMessage &&
+    final enlargeEmojis = emojiEnlargementBehavior != EmojiEnlargementBehavior.never && message is types.TextMessage &&
             isConsistsOfEmojis(
               emojiEnlargementBehavior,
               message as types.TextMessage,
@@ -325,20 +307,20 @@ class MessageView extends StatelessWidget {
     final borderRadius = bubbleRtlAlignment == BubbleRtlAlignment.left
         ? BorderRadiusDirectional.only(
             topEnd: Radius.circular(
-              !currentUserIsAuthor || roundBorder ? messageBorderRadius : 0,
+              !currentUserIsAuthor ? messageBorderRadius : 0,
             ),
             topStart: Radius.circular(
-              currentUserIsAuthor || roundBorder ? messageBorderRadius : 0,
+              currentUserIsAuthor ? messageBorderRadius : 0,
             ),
             bottomEnd: Radius.circular(messageBorderRadius),
             bottomStart: Radius.circular(messageBorderRadius),
           )
         : BorderRadius.only(
             topLeft: Radius.circular(
-              currentUserIsAuthor || roundBorder ? messageBorderRadius : 0,
+              currentUserIsAuthor ? messageBorderRadius : 0,
             ),
             topRight: Radius.circular(
-              !currentUserIsAuthor || roundBorder ? messageBorderRadius : 0,
+              !currentUserIsAuthor ? messageBorderRadius : 0,
             ),
             bottomLeft: Radius.circular(messageBorderRadius),
             bottomRight: Radius.circular(messageBorderRadius),
@@ -364,20 +346,8 @@ class MessageView extends StatelessWidget {
         onSelectTap?.call(message.author);
       },
       child: Container(
-        alignment: bubbleRtlAlignment == BubbleRtlAlignment.left
-            ? currentUserIsAuthor
-                ? AlignmentDirectional.centerEnd
-                : AlignmentDirectional.centerStart
-            : currentUserIsAuthor
-                ? Alignment.centerRight
-                : Alignment.centerLeft,
         margin: bubbleMargin,
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          textDirection: bubbleRtlAlignment == BubbleRtlAlignment.left
-              ? null
-              : TextDirection.ltr,
           children: [
             Center(
               child: Visibility(
@@ -388,74 +358,95 @@ class MessageView extends StatelessWidget {
                 ),
               ),
             ),
-            // const Spacer(),
-            if (!currentUserIsAuthor && showUserAvatars) _avatarBuilder(),
-            ConstrainedBox(
-              constraints: const BoxConstraints(
-                  // maxWidth: messageWidth.toDouble(),
-                  ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  GestureDetector(
-                    onDoubleTap: () => onMessageDoubleTap?.call(context, message),
-                    onLongPressStart: (LongPressStartDetails details) => onMessageLongPress?.call(context, message, details),
-                    onTap: () {
-                      FocusManager.instance.primaryFocus?.unfocus();
-                      if (!isMultipleSelect) {
-                        onMessageTap?.call(context, message);
-                      } else {
-                        onSelectTap?.call(message.author);
-                      }
-                    },
-                    child: onMessageVisibilityChanged != null
-                        ? VisibilityDetector(
-                            key: Key(message.id),
-                            onVisibilityChanged: (visibilityInfo) =>
-                                onMessageVisibilityChanged!(message, visibilityInfo.visibleFraction > 0.1,
-                            ),
-                            child: _bubbleBuilder(
-                              context,
-                              borderRadius.resolve(Directionality.of(context)),
-                              currentUserIsAuthor,
-                              enlargeEmojis,
-                            ),
-                          )
-                        : _bubbleBuilder(
-                            context,
-                            borderRadius.resolve(Directionality.of(context)),
-                            currentUserIsAuthor,
-                            enlargeEmojis,
+            Expanded(
+              child: Container(
+                alignment: bubbleRtlAlignment == BubbleRtlAlignment.left
+                    ? currentUserIsAuthor
+                      ? AlignmentDirectional.centerEnd
+                      : AlignmentDirectional.centerStart
+                    : currentUserIsAuthor
+                      ? Alignment.centerRight
+                      : Alignment.centerLeft,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  textDirection: bubbleRtlAlignment == BubbleRtlAlignment.left
+                      ? null
+                      : TextDirection.ltr,
+                  children: [
+                    if (!currentUserIsAuthor)
+                      ...[
+                        _avatarBuilder(),
+                        const SizedBox(width: 10),
+                      ],
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: messageWidth.toDouble(),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: !currentUserIsAuthor ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+                        children: [
+                          if (showName) nameBuilder?.call(message.author) ?? UserName(author: message.author),
+                          GestureDetector(
+                            onDoubleTap: () => onMessageDoubleTap?.call(context, message),
+                            onLongPressStart: (LongPressStartDetails details) => onMessageLongPress?.call(context, message, details),
+                            onTap: () {
+                              FocusManager.instance.primaryFocus?.unfocus();
+                              if (!isMultipleSelect) {
+                                onMessageTap?.call(context, message);
+                              } else {
+                                onSelectTap?.call(message.author);
+                              }
+                            },
+                            child: onMessageVisibilityChanged != null
+                                ? VisibilityDetector(
+                                    key: Key(message.id),
+                                    onVisibilityChanged: (visibilityInfo) =>
+                                        onMessageVisibilityChanged!(message, visibilityInfo.visibleFraction > 0.1,
+                                        ),
+                                    child: _bubbleBuilder(
+                                      context,
+                                      borderRadius.resolve(Directionality.of(context)),
+                                      currentUserIsAuthor,
+                                      enlargeEmojis,
+                                    ),
+                                  )
+                                : _bubbleBuilder(
+                                    context,
+                                    borderRadius.resolve(Directionality.of(context)),
+                                    currentUserIsAuthor,
+                                    enlargeEmojis,
+                                  ),
                           ),
-                  ),
-                ],
+                        ],
+                      ),
+                    ),
+                    if (currentUserIsAuthor)
+                      ...[
+                        const SizedBox(width: 10),
+                        _avatarBuilder(),
+                      ],
+                    // if (currentUserIsAuthor && !isLeftStatus)
+                    //   Column(
+                    //     children: [
+                    //       SizedBox(height: 30,),
+                    //       Container(
+                    //         color: Colors.red,
+                    //         child: Align(
+                    //           alignment: Alignment.bottomRight,
+                    //           child: _statusIcon(context),
+                    //         ),
+                    //       ),
+                    //     ],
+                    //   ),
+                  ],
+                ),
               ),
             ),
-            if (currentUserIsAuthor && showUserAvatars)
-              const SizedBox(
-                width: 10,
-              ),
-            if (currentUserIsAuthor && showUserAvatars)
-            _avatarBuilder(),
-            // if (currentUserIsAuthor && !isLeftStatus)
-            //   Column(
-            //     children: [
-            //       SizedBox(height: 30,),
-            //       Container(
-            //         color: Colors.red,
-            //         child: Align(
-            //           alignment: Alignment.bottomRight,
-            //           child: _statusIcon(context),
-            //         ),
-            //       ),
-            //     ],
-            //   ),
           ],
         ),
       ),
     );
   }
+
 }

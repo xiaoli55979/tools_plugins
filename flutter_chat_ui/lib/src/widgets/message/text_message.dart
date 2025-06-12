@@ -22,7 +22,6 @@ class TextMessage extends StatelessWidget {
     this.nameBuilder,
     this.onPreviewDataFetched,
     this.options = const TextMessageOptions(),
-    required this.showName,
     required this.usePreviewData,
     this.userAgent,
   });
@@ -45,9 +44,6 @@ class TextMessage extends StatelessWidget {
 
   /// Customisation options for the [TextMessage].
   final TextMessageOptions options;
-
-  /// Show user name for the received message. Useful for a group chat.
-  final bool showName;
 
   /// Enables link (URL) preview.
   final bool usePreviewData;
@@ -110,7 +106,6 @@ class TextMessage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (showName) nameBuilder?.call(message.author) ?? UserName(author: message.author),
         if (enlargeEmojis)
           if (options.isTextSelectable) SelectableText(message.text, style: emojiTextStyle) else Text(message.text, style: emojiTextStyle)
         else

@@ -1,5 +1,6 @@
 import 'package:example/const.dart';
 import 'package:wukongimfluttersdk/common/options.dart';
+import 'package:wukongimfluttersdk/model/wk_file_content.dart';
 import 'package:wukongimfluttersdk/model/wk_image_content.dart';
 import 'package:wukongimfluttersdk/model/wk_video_content.dart';
 import 'package:wukongimfluttersdk/model/wk_voice_content.dart';
@@ -90,8 +91,13 @@ class IMUtils {
         imageContent.url = 'xxxxxx';
         wkMsg.messageContent = imageContent;
         back(true, wkMsg);
-      }
-      if (wkMsg.contentType == WkMessageContentType.voice) {
+      } else if (wkMsg.contentType == WkMessageContentType.file) {
+        // todo 上传文件
+        WKFileContent fileContent = wkMsg.messageContent! as WKFileContent;
+        fileContent.url = 'xxxxxx';
+        wkMsg.messageContent = fileContent;
+        back(true, wkMsg);
+      } else if (wkMsg.contentType == WkMessageContentType.voice) {
         // todo 上传语音
         WKVoiceContent voiceContent = wkMsg.messageContent! as WKVoiceContent;
         voiceContent.url = 'xxxxxx';

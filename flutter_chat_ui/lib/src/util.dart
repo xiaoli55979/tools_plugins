@@ -127,42 +127,20 @@ List<Object> calculateChatMessages(
     final messageHasCreatedAt = message.createdAt != null;
     final nextMessage = isLast ? null : messages[i - 1];
     final nextMessageHasCreatedAt = nextMessage?.createdAt != null;
+    /// 前后消息是否同用户
     final nextMessageSameAuthor = message.author.id == nextMessage?.author.id;
+    /// 是否当前登录用户
     final notMyMessage = message.author.id != user.id;
 
+    /// 下一条消息是否在时间间隔内
     var nextMessageDateThreshold = false;
+    /// 下一条消息不是同一天
     var nextMessageDifferentDay = false;
+    /// 下一条消息没有超过时间阈值或不是同一个用户
     var nextMessageInGroup = false;
-    var showName = false;
-
-    if (showUserNames) {
-      final previousMessage = isFirst ? null : messages[i + 1];
-
-      final isFirstInGroup = notMyMessage &&
-          ((message.author.id != previousMessage?.author.id) ||
-              (messageHasCreatedAt &&
-                  previousMessage?.createdAt != null &&
-                  message.createdAt! - previousMessage!.createdAt! >
-                      groupMessagesThreshold));
-
-      if (isFirstInGroup) {
-        shouldShowName = false;
-        if (message.type == types.MessageType.text) {
-          showName = true;
-        } else {
-          shouldShowName = true;
-        }
-      }
-
-      if (message.type == types.MessageType.text && shouldShowName) {
-        showName = true;
-        shouldShowName = false;
-      }
-    }
 
     if (messageHasCreatedAt && nextMessageHasCreatedAt) {
-      nextMessageDateThreshold =
-          nextMessage!.createdAt! - message.createdAt! >= dateHeaderThreshold;
+      nextMessageDateThreshold = nextMessage!.createdAt! - message.createdAt! >= dateHeaderThreshold;
 
       nextMessageDifferentDay = DateTime.fromMillisecondsSinceEpoch(
             message.createdAt!,
@@ -178,6 +156,7 @@ List<Object> calculateChatMessages(
           nextMessage.createdAt! - message.createdAt! <= groupMessagesThreshold;
     }
 
+    /// 顶部消息添加时间
     if (isFirst && messageHasCreatedAt) {
       chatMessages.insert(
         0,
@@ -206,13 +185,14 @@ List<Object> calculateChatMessages(
       );
     }
 
+    /// 添加当前消息
     chatMessages.insert(0, {
       'message': message,
-      'nextMessageInGroup': nextMessageInGroup,
-      'showName': notMyMessage && showUserNames && showName,
+      'showName': notMyMessage && showUserNames,
       'showStatus': message.showStatus ?? true,
     });
 
+    /// 下一条消息没有超过时间阈值或不是同一个用户且不是系统消息 添加间隔
     if (!nextMessageInGroup && message.type != types.MessageType.system) {
       chatMessages.insert(
         0,
@@ -251,6 +231,7 @@ List<Object> calculateChatMessages(
       );
     }
 
+    /// 添加未读消息
     if (message.id == lastReadMessageId && !isLast) {
       chatMessages.insert(
         0,
