@@ -207,7 +207,7 @@ class MessageView extends StatelessWidget {
               color: !currentUserIsAuthor ||
                   message.type == types.MessageType.image
                   ? Colors.white
-                  : const Color(0xff2FBC63),
+                  : Colors.white,
             ),
             child: ClipRRect(
               borderRadius: borderRadius,
