@@ -56,7 +56,7 @@ class WKIM {
         0,
       ).decodeJson(data);
     });
-    messageManager.registerMsgContent(WkMessageContentType.image,
+    messageManager.registerMsgContent(WkMessageContentType.file,
             (dynamic data) {
           return WKFileContent(
             '',
