@@ -73,6 +73,7 @@ class Chat extends StatefulWidget {
     this.scrollToUnreadOptions = const ScrollToUnreadOptions(),
     this.showUserNames = false,
     this.systemMessageBuilder,
+    this.revokeMessageBuilder,
     this.theme = const DefaultChatTheme(),
     this.timeFormat,
     this.typingIndicatorOptions = const TypingIndicatorOptions(),
@@ -214,6 +215,9 @@ class Chat extends StatefulWidget {
 
   /// 系统消息构造器.
   final Widget Function(types.SystemMessage)? systemMessageBuilder;
+
+  /// 撤回消息构造器.
+  final Widget Function(types.Message)? revokeMessageBuilder;
 
   /// 聊天主题.
   final ChatTheme theme;
@@ -450,9 +454,18 @@ class ChatState extends State<Chat> {
       }
       final Widget messageWidget;
 
+      final metadata = message.metadata;
+      int? revoke;
+      if (metadata != null) {
+        revoke = metadata["revoke"];
+      }
+
       if (message is types.SystemMessage) {
         messageWidget = widget.systemMessageBuilder?.call(message) ??
             SystemMessage(message: message.text);
+      } else if(revoke == 1) {
+        messageWidget = widget.revokeMessageBuilder?.call(message) ??
+            const SizedBox();
       } else {
         final maxWidth = widget.theme.messageMaxWidth;
         final messageWidth =
