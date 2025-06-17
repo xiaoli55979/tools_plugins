@@ -15,11 +15,7 @@ class UserAvatar extends StatelessWidget {
     this.bubbleRtlAlignment,
     this.imageHeaders,
     this.onAvatarTap,
-    this.isMultipleSelect = false,
-    this.onSelectMultipleTap,
   });
-  final void Function(types.User)? onSelectMultipleTap;
-  bool isMultipleSelect;
 
   /// Author to show image and name initials from.
   final types.User author;
@@ -47,7 +43,7 @@ class UserAvatar extends StatelessWidget {
           ? const EdgeInsetsDirectional.only(end: 8)
           : const EdgeInsets.only(right: 8),
       child: GestureDetector(
-        onTap: () => !isMultipleSelect ? onAvatarTap?.call(author) : onSelectMultipleTap?.call(author),
+        onTap: () => onAvatarTap?.call(author),
         child: CircleAvatar(
           backgroundColor: hasImage
               ? InheritedChatTheme.of(context)

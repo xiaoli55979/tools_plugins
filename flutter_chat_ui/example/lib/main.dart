@@ -233,9 +233,10 @@ class _ChatPageState extends State<ChatPage> {
           onMessageTap: _handleMessageTap,
           onPreviewDataFetched: _handlePreviewDataFetched,
           onSendPressed: _handleSendPressed,
-          showUserAvatars: true,
           showUserNames: true,
-          user: _user, didSelectedMsgs: [], didSelectedMsgsFun: (List<Message> ) {  },
+          user: _user,
+          chooseMsgList: [],
+          chooseMsgAction: (messages) {  },
         ),
       );
 }

@@ -9,7 +9,6 @@ import '../../models/pattern_style.dart';
 import '../../util.dart';
 import '../state/inherited_chat_theme.dart';
 import '../state/inherited_user.dart';
-import 'user_name.dart';
 
 /// A class that represents text message widget with optional link preview.
 class TextMessage extends StatelessWidget {
@@ -19,12 +18,15 @@ class TextMessage extends StatelessWidget {
     required this.emojiEnlargementBehavior,
     required this.hideBackgroundOnEmojiMessages,
     required this.message,
+    required this.messageWidth,
     this.nameBuilder,
     this.onPreviewDataFetched,
     this.options = const TextMessageOptions(),
     required this.usePreviewData,
     this.userAgent,
   });
+
+  final int messageWidth;
 
   /// See [Message.emojiEnlargementBehavior].
   final EmojiEnlargementBehavior emojiEnlargementBehavior;
@@ -139,6 +141,9 @@ class TextMessage extends StatelessWidget {
     }
 
     return Container(
+      constraints: BoxConstraints(
+        maxWidth: messageWidth.toDouble(),
+      ),
       margin: EdgeInsets.symmetric(
         horizontal: theme.messageInsetsHorizontal,
         vertical: theme.messageInsetsVertical,

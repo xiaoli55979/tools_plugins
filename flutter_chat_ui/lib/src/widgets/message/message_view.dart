@@ -16,7 +16,7 @@ import 'user_name.dart';
 
 /*消息外部包裹樣式、头像、名称、消息状态构造器*/
 typedef BubbleBuilder = Widget Function(Widget child, {required types.Message message});
-typedef AvatarBuilder = Widget Function(types.User author, bool isMultipleSelect, types.Message msg);
+typedef AvatarBuilder = Widget Function(types.User author, types.Message msg);
 typedef NameBuilder = Widget Function(types.User);
 typedef CustomStatusBuilder = Widget Function(types.Message message, {required BuildContext context});
 
@@ -75,10 +75,10 @@ class MessageView extends StatelessWidget {
     this.onMessageVisibilityChanged,
     this.onPreviewDataFetched,
     this.userAgent,
-    this.isMultipleSelect = false,
-    this.isSelected = false,
-    this.onMultipleTap,
-    this.onSelectTap,
+    this.isMultiChoose = false,
+    this.isChoosed = false,
+    this.chooseAction,
+    this.onBackgroundTap,
   });
 
   /// 消息实体.
@@ -173,24 +173,24 @@ class MessageView extends StatelessWidget {
   /// See [TextMessage.userAgent].
   final String? userAgent;
 
-  final VoidCallback? onMultipleTap;
-
-  final void Function(types.User)? onSelectTap;
+  final void Function(types.Message)? chooseAction;
 
   /// 是否多选.
-  bool isMultipleSelect;
+  bool isMultiChoose;
 
   /// 是否选中.
-  bool isSelected;
+  bool isChoosed;
+
+  /// 点击聊天背景事件.
+  final VoidCallback? onBackgroundTap;
 
   Widget _avatarBuilder() =>
-      avatarBuilder?.call(message.author, isMultipleSelect, message) ??
+      avatarBuilder?.call(message.author, message) ??
           UserAvatar(
             author: message.author,
             bubbleRtlAlignment: bubbleRtlAlignment,
             imageHeaders: imageHeaders,
-            isMultipleSelect: isMultipleSelect,
-            onAvatarTap: !isMultipleSelect ? onAvatarTap : onSelectTap,
+            onAvatarTap: onAvatarTap,
           );
 
   Widget _bubbleBuilder(
@@ -266,6 +266,7 @@ class MessageView extends StatelessWidget {
                 options: textMessageOptions,
                 usePreviewData: usePreviewData,
                 userAgent: userAgent,
+                messageWidth: messageWidth,
               );
       case types.MessageType.video:
         final videoMessage = message as types.VideoMessage;
@@ -340,10 +341,14 @@ class MessageView extends StatelessWidget {
               ));
 
     return GestureDetector(
-      behavior: HitTestBehavior.opaque,
+      behavior: HitTestBehavior.translucent,
       onTap: () {
-        FocusManager.instance.primaryFocus?.unfocus();
-        onSelectTap?.call(message.author);
+        if (isMultiChoose) {
+          chooseAction?.call(message);
+        } else {
+          FocusManager.instance.primaryFocus?.unfocus();
+          onBackgroundTap?.call();
+        }
       },
       child: Container(
         margin: bubbleMargin,
@@ -351,9 +356,9 @@ class MessageView extends StatelessWidget {
           children: [
             Center(
               child: Visibility(
-                visible: isMultipleSelect,
+                visible: isMultiChoose,
                 child: Icon(
-                  isSelected ? Icons.check_box : Icons.check_box_outlined,
+                  isChoosed ? Icons.check_box : Icons.check_box_outlined,
                   weight: 20,
                 ),
               ),
@@ -379,47 +384,48 @@ class MessageView extends StatelessWidget {
                         _avatarBuilder(),
                         const SizedBox(width: 10),
                       ],
-                    ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: messageWidth.toDouble(),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: !currentUserIsAuthor ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-                        children: [
-                          if (showName) nameBuilder?.call(message.author) ?? UserName(author: message.author),
-                          GestureDetector(
-                            onDoubleTap: () => onMessageDoubleTap?.call(context, message),
-                            onLongPressStart: (LongPressStartDetails details) => onMessageLongPress?.call(context, message, details),
-                            onTap: () {
+                    Column(
+                      crossAxisAlignment: !currentUserIsAuthor ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+                      children: [
+                        if (showName) nameBuilder?.call(message.author) ?? UserName(author: message.author),
+                        GestureDetector(
+                          onDoubleTap: () {
+                            if (isMultiChoose) return;
+                            onMessageDoubleTap?.call(context, message);
+                          },
+                          onLongPressStart: (LongPressStartDetails details) {
+                            if (isMultiChoose) return;
+                            onMessageLongPress?.call(context, message, details);
+                          },
+                          onTap: () {
+                            if (isMultiChoose) {
+                              chooseAction?.call(message);
+                            } else {
                               FocusManager.instance.primaryFocus?.unfocus();
-                              if (!isMultipleSelect) {
-                                onMessageTap?.call(context, message);
-                              } else {
-                                onSelectTap?.call(message.author);
-                              }
-                            },
-                            child: onMessageVisibilityChanged != null
-                                ? VisibilityDetector(
-                                    key: Key(message.id),
-                                    onVisibilityChanged: (visibilityInfo) =>
-                                        onMessageVisibilityChanged!(message, visibilityInfo.visibleFraction > 0.1,
-                                        ),
-                                    child: _bubbleBuilder(
-                                      context,
-                                      borderRadius.resolve(Directionality.of(context)),
-                                      currentUserIsAuthor,
-                                      enlargeEmojis,
-                                    ),
-                                  )
-                                : _bubbleBuilder(
-                                    context,
-                                    borderRadius.resolve(Directionality.of(context)),
-                                    currentUserIsAuthor,
-                                    enlargeEmojis,
-                                  ),
+                              onMessageTap?.call(context, message);
+                            }
+                          },
+                          child: onMessageVisibilityChanged != null
+                              ? VisibilityDetector(
+                            key: Key(message.id),
+                            onVisibilityChanged: (visibilityInfo) =>
+                                onMessageVisibilityChanged!(message, visibilityInfo.visibleFraction > 0.1,
+                                ),
+                            child: _bubbleBuilder(
+                              context,
+                              borderRadius.resolve(Directionality.of(context)),
+                              currentUserIsAuthor,
+                              enlargeEmojis,
+                            ),
+                          )
+                              : _bubbleBuilder(
+                            context,
+                            borderRadius.resolve(Directionality.of(context)),
+                            currentUserIsAuthor,
+                            enlargeEmojis,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                     if (currentUserIsAuthor)
                       ...[

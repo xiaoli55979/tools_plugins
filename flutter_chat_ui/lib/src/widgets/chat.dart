@@ -42,8 +42,8 @@ class Chat extends StatefulWidget {
     required this.messages,
     required this.user,
     required this.onSendPressed,
-    required this.didSelectedMsgs,
-    required this.didSelectedMsgsFun,
+    required this.chooseMsgList,
+    required this.chooseMsgAction,
     this.customBottomWidget,
     this.inputOptions = const ChatInputOptions(),
     this.isAttachmentUploading,
@@ -82,7 +82,6 @@ class Chat extends StatefulWidget {
     this.messageWidthRatio = 0.72,
     this.topConfig = const TopConfigOption(),
     this.topTapCallBack,
-    this.selectedMsg,
     this.isLeftStatus = false,
     this.textMessageOptions = const TextMessageOptions(),
     this.usePreviewData = true,
@@ -111,7 +110,6 @@ class Chat extends StatefulWidget {
     this.onPreviewDataFetched,
     this.userAgent,
     this.isMultipleSelect = false,
-    this.isSelected = false,
   });
 
   final List<types.Message> messages;
@@ -121,10 +119,6 @@ class Chat extends StatefulWidget {
 
   /// 发送事件.
   final void Function(types.PartialText) onSendPressed;
-
-  final void Function(List<types.Message>) didSelectedMsgsFun;
-  List<types.Message> didSelectedMsgs;
-  final void Function(types.Message)? selectedMsg;
 
   /// 是否显示加载历史消息按钮.
   final TopConfigOption topConfig;
@@ -250,7 +244,7 @@ class Chat extends StatefulWidget {
   /// 控制表情是否能放大，默认[EmojiEnlargementBehavior.multi].
   final EmojiEnlargementBehavior emojiEnlargementBehavior;
 
-  /// 仅在表情图标上隐藏背景. 默认为true
+  /// 仅在表情图标上隐藏背景. 默认为true.
   final bool hideBackgroundOnEmojiMessages;
 
   /// 自定义消息体外部样式.
@@ -321,8 +315,9 @@ class Chat extends StatefulWidget {
   /// 是否多选.
   bool isMultipleSelect;
 
-  /// 是否选中.
-  bool isSelected;
+  List<types.Message> chooseMsgList;
+
+  final void Function(types.Message) chooseMsgAction;
 
   @override
   State<Chat> createState() => ChatState();
@@ -447,11 +442,6 @@ class ChatState extends State<Chat> {
     } else {
       final map = object as Map<String, Object>;
       final message = map['message']! as types.Message;
-      if (widget.didSelectedMsgs.contains(message)) {
-        widget.isSelected = true;
-      } else {
-        widget.isSelected = false;
-      }
       final Widget messageWidget;
 
       final metadata = message.metadata;
@@ -515,25 +505,11 @@ class ChatState extends State<Chat> {
           onMessageVisibilityChanged: widget.onMessageVisibilityChanged,
           onPreviewDataFetched: widget.onPreviewDataFetched,
           userAgent: widget.userAgent,
-          isMultipleSelect: widget.isMultipleSelect,
-          isSelected: widget.isSelected,
-          onMultipleTap: () {
-            setState(() {
-              widget.isMultipleSelect = !widget.isMultipleSelect;
-            });
-          },
-          onSelectTap: (types.User user) {
-            setState(() {
-              if (widget.didSelectedMsgs.contains(message)) {
-                widget.didSelectedMsgs.remove(message);
-                widget.isSelected = false;
-              } else {
-                widget.didSelectedMsgs.add(message);
-                widget.isSelected = true;
-              }
-              widget.didSelectedMsgsFun(widget.didSelectedMsgs);
-              // Widget.isSelectedMultiple = !widget.isSelectedMultiple;.
-            });
+          onBackgroundTap: widget.onBackgroundTap,
+          isMultiChoose: widget.isMultipleSelect,
+          isChoosed: widget.chooseMsgList.contains(message),
+          chooseAction: (types.Message message) {
+            widget.chooseMsgAction(message);
           },
         );
         messageWidget = widget.slidableMessageBuilder == null
