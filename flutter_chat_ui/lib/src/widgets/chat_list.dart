@@ -24,6 +24,7 @@ class ChatList extends StatefulWidget {
     this.scrollPhysics,
     this.typingIndicatorOptions,
     required this.useTopSafeAreaInset,
+    this.onBackgroundTap,
   });
 
   /// A custom widget at the bottom of the list.
@@ -67,6 +68,9 @@ class ChatList extends StatefulWidget {
 
   /// Whether to use top safe area inset for the list.
   final bool useTopSafeAreaInset;
+
+  /// 点击聊天背景事件.
+  final void Function(bool onlyDismissMore)? onBackgroundTap;
 
   @override
   State<ChatList> createState() => _ChatListState();
@@ -219,6 +223,9 @@ class _ChatListState extends State<ChatList>
   Widget build(BuildContext context) =>
       NotificationListener<ScrollNotification>(
         onNotification: (notification) {
+          if (notification.metrics.pixels > 0.0) {
+            widget.onBackgroundTap?.call(false);
+          }
           if (notification.metrics.pixels > 10.0 && !_indicatorOnScrollStatus) {
             setState(() {
               _indicatorOnScrollStatus = !_indicatorOnScrollStatus;

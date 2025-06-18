@@ -182,7 +182,7 @@ class MessageView extends StatelessWidget {
   bool isChoosed;
 
   /// 点击聊天背景事件.
-  final VoidCallback? onBackgroundTap;
+  final void Function(bool onlyDismissMore)? onBackgroundTap;
 
   Widget _avatarBuilder() =>
       avatarBuilder?.call(message.author, message) ??
@@ -347,7 +347,7 @@ class MessageView extends StatelessWidget {
           chooseAction?.call(message);
         } else {
           FocusManager.instance.primaryFocus?.unfocus();
-          onBackgroundTap?.call();
+          onBackgroundTap?.call(false);
         }
       },
       child: Container(
@@ -401,7 +401,10 @@ class MessageView extends StatelessWidget {
                             if (isMultiChoose) {
                               chooseAction?.call(message);
                             } else {
-                              FocusManager.instance.primaryFocus?.unfocus();
+                              if (message.type != types.MessageType.text) {
+                                FocusManager.instance.primaryFocus?.unfocus();
+                                onBackgroundTap?.call(true);
+                              }
                               onMessageTap?.call(context, message);
                             }
                           },

@@ -109,7 +109,7 @@ class Chat extends StatefulWidget {
     this.onMessageVisibilityChanged,
     this.onPreviewDataFetched,
     this.userAgent,
-    this.isMultipleSelect = false,
+    this.isMultiChoose = false,
   });
 
   final List<types.Message> messages;
@@ -186,7 +186,7 @@ class Chat extends StatefulWidget {
   final Widget? listBottomWidget;
 
   /// 点击聊天背景事件.
-  final VoidCallback? onBackgroundTap;
+  final void Function(bool onlyDismissMore)? onBackgroundTap;
 
   /// See [ChatList.onEndReached].
   final Future<void> Function()? onEndReached;
@@ -313,7 +313,7 @@ class Chat extends StatefulWidget {
   final String? userAgent;
 
   /// 是否多选.
-  bool isMultipleSelect;
+  bool isMultiChoose;
 
   List<types.Message> chooseMsgList;
 
@@ -506,7 +506,7 @@ class ChatState extends State<Chat> {
           onPreviewDataFetched: widget.onPreviewDataFetched,
           userAgent: widget.userAgent,
           onBackgroundTap: widget.onBackgroundTap,
-          isMultiChoose: widget.isMultipleSelect,
+          isMultiChoose: widget.isMultiChoose,
           isChoosed: widget.chooseMsgList.contains(message),
           chooseAction: (types.Message message) {
             widget.chooseMsgAction(message);
@@ -644,8 +644,10 @@ class ChatState extends State<Chat> {
                               )
                             : GestureDetector(
                                 onTap: () {
-                                  FocusManager.instance.primaryFocus?.unfocus();
-                                  widget.onBackgroundTap?.call();
+                                  if (!widget.isMultiChoose) {
+                                    FocusManager.instance.primaryFocus?.unfocus();
+                                    widget.onBackgroundTap?.call(false);
+                                  }
                                 },
                                 child: LayoutBuilder(
                                   builder: (
@@ -655,6 +657,7 @@ class ChatState extends State<Chat> {
                                       ChatList(
                                         bottomWidget: widget.listBottomWidget,
                                         bubbleRtlAlignment: widget.bubbleRtlAlignment!,
+                                        onBackgroundTap: widget.onBackgroundTap,
                                         isLastPage: widget.isLastPage,
                                         itemBuilder: (Object item, int? index) => _messageBuilder(item, constraints, index),
                                         items: _chatMessages,
