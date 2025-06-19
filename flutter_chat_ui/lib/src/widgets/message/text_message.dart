@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_link_previewer/flutter_link_previewer.dart' show LinkPreview, regexLink;
@@ -19,7 +21,6 @@ class TextMessage extends StatelessWidget {
     required this.hideBackgroundOnEmojiMessages,
     required this.message,
     required this.messageWidth,
-    this.nameBuilder,
     this.onPreviewDataFetched,
     this.options = const TextMessageOptions(),
     required this.usePreviewData,
@@ -36,10 +37,6 @@ class TextMessage extends StatelessWidget {
 
   /// [types.TextMessage].
   final types.TextMessage message;
-
-  /// This is to allow custom user name builder
-  /// By using this we can fetch newest user info based on id.
-  final Widget Function(types.User)? nameBuilder;
 
   /// See [LinkPreview.onPreviewDataFetched].
   final void Function(types.TextMessage, types.PreviewData)? onPreviewDataFetched;
@@ -130,6 +127,10 @@ class TextMessage extends StatelessWidget {
     final theme = InheritedChatTheme.of(context).theme;
     final user = InheritedUser.of(context).user;
     final width = MediaQuery.of(context).size.width;
+    final metadata = message.metadata;
+    final contentType = metadata?["type"] ?? -1;
+    final wkMsg = jsonDecode(metadata?['wkMsg']);
+    final messageContent = wkMsg['messageContent'];
 
     if (usePreviewData && onPreviewDataFetched != null) {
       final urlRegexp = RegExp(regexLink, caseSensitive: false);
