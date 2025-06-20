@@ -189,7 +189,6 @@ List<Object> calculateChatMessages(
     chatMessages.insert(0, {
       'message': message,
       'showName': notMyMessage && showUserNames,
-      'showStatus': message.showStatus ?? true,
     });
 
     /// 下一条消息没有超过时间阈值或不是同一个用户且不是系统消息 添加间隔

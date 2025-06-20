@@ -82,7 +82,6 @@ class Chat extends StatefulWidget {
     this.messageWidthRatio = 0.72,
     this.topConfig = const TopConfigOption(),
     this.topTapCallBack,
-    this.isLeftStatus = false,
     this.textMessageOptions = const TextMessageOptions(),
     this.usePreviewData = true,
     this.emojiEnlargementBehavior = EmojiEnlargementBehavior.multi,
@@ -231,9 +230,6 @@ class Chat extends StatefulWidget {
 
   /// Width ratio for message bubble.
   final double messageWidthRatio;
-
-  /// 状态消息在左侧还是右侧，默认false.
-  final bool isLeftStatus;
 
   /// 文本消息配置.
   final TextMessageOptions textMessageOptions;
@@ -470,8 +466,7 @@ class ChatState extends State<Chat> {
           message: message,
           messageWidth: messageWidth,
           showName: map['showName'] == true,
-          showStatus: map['showStatus'] == true,
-          isLeftStatus: widget.isLeftStatus,
+          showStatus: true,
           textMessageOptions: widget.textMessageOptions,
           usePreviewData: widget.usePreviewData,
           emojiEnlargementBehavior: widget.emojiEnlargementBehavior,

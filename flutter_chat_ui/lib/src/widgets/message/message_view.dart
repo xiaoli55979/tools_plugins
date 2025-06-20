@@ -48,7 +48,6 @@ class MessageView extends StatelessWidget {
     required this.messageWidth,
     required this.showName,
     required this.showStatus,
-    required this.isLeftStatus,
     required this.textMessageOptions,
     required this.usePreviewData,
     required this.emojiEnlargementBehavior,
@@ -92,9 +91,6 @@ class MessageView extends StatelessWidget {
 
   /// 是否显示消息状态.
   final bool showStatus;
-
-  /// 状态消息在左侧还是右侧，默认false.
-  final bool isLeftStatus;
 
   /// 文本消息配置.
   final TextMessageOptions textMessageOptions;
@@ -383,70 +379,59 @@ class MessageView extends StatelessWidget {
                         _avatarBuilder(),
                         const SizedBox(width: 10),
                       ],
-                    Column(
-                      crossAxisAlignment: !currentUserIsAuthor ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-                      children: [
-                        if (showName) nameBuilder?.call(message.author) ?? UserName(author: message.author),
-                        GestureDetector(
-                          onDoubleTap: () {
-                            if (isMultiChoose) return;
-                            onMessageDoubleTap?.call(context, message);
-                          },
-                          onLongPressStart: (LongPressStartDetails details) {
-                            if (isMultiChoose) return;
-                            onMessageLongPress?.call(context, message, details);
-                          },
-                          onTap: () {
-                            if (isMultiChoose) {
-                              chooseAction?.call(message);
-                            } else {
-                              if (message.type != types.MessageType.text) {
-                                FocusManager.instance.primaryFocus?.unfocus();
-                                onBackgroundTap?.call(true);
+                    Flexible(
+                      child: Column(
+                        crossAxisAlignment: !currentUserIsAuthor ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+                        children: [
+                          if (showName) nameBuilder?.call(message.author) ?? UserName(author: message.author),
+                          GestureDetector(
+                            onDoubleTap: () {
+                              if (isMultiChoose) return;
+                              onMessageDoubleTap?.call(context, message);
+                            },
+                            onLongPressStart: (LongPressStartDetails details) {
+                              if (isMultiChoose) return;
+                              onMessageLongPress?.call(context, message, details);
+                            },
+                            onTap: () {
+                              if (isMultiChoose) {
+                                chooseAction?.call(message);
+                              } else {
+                                if (message.type != types.MessageType.text) {
+                                  FocusManager.instance.primaryFocus?.unfocus();
+                                  onBackgroundTap?.call(true);
+                                }
+                                onMessageTap?.call(context, message);
                               }
-                              onMessageTap?.call(context, message);
-                            }
-                          },
-                          child: onMessageVisibilityChanged != null
-                              ? VisibilityDetector(
-                            key: Key(message.id),
-                            onVisibilityChanged: (visibilityInfo) =>
-                                onMessageVisibilityChanged!(message, visibilityInfo.visibleFraction > 0.1,
-                                ),
-                            child: _bubbleBuilder(
+                            },
+                            child: onMessageVisibilityChanged != null
+                                ? VisibilityDetector(
+                              key: Key(message.id),
+                              onVisibilityChanged: (visibilityInfo) =>
+                                  onMessageVisibilityChanged!(message, visibilityInfo.visibleFraction > 0.1,
+                                  ),
+                              child: _bubbleBuilder(
+                                context,
+                                borderRadius.resolve(Directionality.of(context)),
+                                currentUserIsAuthor,
+                                enlargeEmojis,
+                              ),
+                            )
+                                : _bubbleBuilder(
                               context,
                               borderRadius.resolve(Directionality.of(context)),
                               currentUserIsAuthor,
                               enlargeEmojis,
                             ),
-                          )
-                              : _bubbleBuilder(
-                            context,
-                            borderRadius.resolve(Directionality.of(context)),
-                            currentUserIsAuthor,
-                            enlargeEmojis,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     if (currentUserIsAuthor)
                       ...[
                         const SizedBox(width: 10),
                         _avatarBuilder(),
                       ],
-                    // if (currentUserIsAuthor && !isLeftStatus)
-                    //   Column(
-                    //     children: [
-                    //       SizedBox(height: 30,),
-                    //       Container(
-                    //         color: Colors.red,
-                    //         child: Align(
-                    //           alignment: Alignment.bottomRight,
-                    //           child: _statusIcon(context),
-                    //         ),
-                    //       ),
-                    //     ],
-                    //   ),
                   ],
                 ),
               ),
