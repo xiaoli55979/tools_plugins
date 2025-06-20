@@ -116,9 +116,6 @@ List<Object> calculateChatMessages(
   DateFormat? timeFormat,
 }) {
   final chatMessages = <Object>[];
-  final gallery = <PreviewImage>[];
-
-  var shouldShowName = false;
 
   for (var i = messages.length - 1; i >= 0; i--) {
     final isFirst = i == messages.length - 1;
@@ -240,17 +237,7 @@ List<Object> calculateChatMessages(
         ),
       );
     }
-
-    if (message is types.ImageMessage) {
-      if (kIsWeb) {
-        if (message.uri.startsWith('http') || message.uri.startsWith('blob')) {
-          gallery.add(PreviewImage(id: message.id, uri: message.uri));
-        }
-      } else {
-        gallery.add(PreviewImage(id: message.id, uri: message.uri));
-      }
-    }
   }
 
-  return [chatMessages, gallery];
+  return [chatMessages];
 }

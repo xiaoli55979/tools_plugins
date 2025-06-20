@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:intl/intl.dart';
-import 'package:photo_view/photo_view.dart' show PhotoViewComputedScale;
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 import '../chat_l10n.dart';
@@ -12,12 +11,10 @@ import '../options/bubble_rtl_alignment.dart';
 import '../models/date_header.dart';
 import '../options/emoji_enlargement_behavior.dart';
 import '../models/message_spacer.dart';
-import '../models/preview_image.dart';
 import '../models/unread_header_data.dart';
 import '../options/chat_input_options.dart';
 import '../util.dart';
 import 'chat_list.dart';
-import 'image_gallery.dart';
 import 'input/input.dart';
 import 'message/image_message.dart';
 import 'message/message_view.dart';
@@ -54,13 +51,8 @@ class Chat extends StatefulWidget {
     this.dateHeaderThreshold = 900000,
     this.dateIsUtc = false,
     this.dateLocale,
-    this.disableImageGallery,
     this.emptyState,
     this.groupMessagesThreshold = 60000,
-    this.imageGalleryOptions = const ImageGalleryOptions(
-      maxScale: PhotoViewComputedScale.covered,
-      minScale: PhotoViewComputedScale.contained,
-    ),
     this.isLastPage,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.l10n = const ChatL10nEn(),
@@ -157,17 +149,11 @@ class Chat extends StatefulWidget {
   /// an error will be thrown. Also see [customDateHeaderText], [dateFormat], [timeFormat].
   final String? dateLocale;
 
-  /// 是否自动处理图片点击事件.
-  final bool? disableImageGallery;
-
   /// 自定义无数据样式.
   final Widget? emptyState;
 
   /// 两条消息之间的时间（以毫秒为单位），我们将对它们进行视觉分组. 默认值为1分钟60000毫秒.
   final int groupMessagesThreshold;
-
-  /// See [ImageGallery.options].
-  final ImageGalleryOptions imageGalleryOptions;
 
   /// See [ChatList.isLastPage].
   final bool? isLastPage;
@@ -225,8 +211,7 @@ class Chat extends StatefulWidget {
   final bool? useTopSafeAreaInset;
 
   /// See [Message.slidableMessageBuilder].
-  final Widget Function(types.Message, Widget msgWidget)?
-      slidableMessageBuilder;
+  final Widget Function(types.Message, Widget msgWidget)?slidableMessageBuilder;
 
   /// Width ratio for message bubble.
   final double messageWidthRatio;
@@ -325,10 +310,7 @@ class ChatState extends State<Chat> {
   static const String _unreadHeaderId = 'unread_header_id';
 
   List<Object> _chatMessages = [];
-  List<PreviewImage> _gallery = [];
-  PageController? _galleryPageController;
   bool _hadScrolledToUnreadOnOpen = false;
-  bool _isImageViewVisible = false;
 
   late final AutoScrollController _scrollController;
 
@@ -486,11 +468,6 @@ class ChatState extends State<Chat> {
           customMessageBuilder: widget.customMessageBuilder,
           onAvatarTap: widget.onAvatarTap,
           onMessageTap: (context, tappedMessage) {
-            if (tappedMessage is types.ImageMessage &&
-                widget.disableImageGallery != true) {
-              _onImagePressed(tappedMessage);
-            }
-
             widget.onMessageTap?.call(context, tappedMessage);
           },
           onMessageDoubleTap: widget.onMessageDoubleTap,
@@ -520,24 +497,6 @@ class ChatState extends State<Chat> {
         child: messageWidget,
       );
     }
-  }
-
-  void _onCloseGalleryPressed() {
-    setState(() {
-      _isImageViewVisible = false;
-    });
-    _galleryPageController?.dispose();
-    _galleryPageController = null;
-  }
-
-  void _onImagePressed(types.ImageMessage message) {
-    final initialPage = _gallery.indexWhere(
-      (element) => element.id == message.id && element.uri == message.uri,
-    );
-    _galleryPageController = PageController(initialPage: initialPage);
-    setState(() {
-      _isImageViewVisible = true;
-    });
   }
 
   /// Updates the [chatMessageAutoScrollIndexById] mapping with the latest messages.
@@ -575,7 +534,6 @@ class ChatState extends State<Chat> {
       );
 
       _chatMessages = result[0] as List<Object>;
-      _gallery = result[1] as List<PreviewImage>;
 
       _refreshAutoScrollMapping();
       _maybeScrollToFirstUnread();
@@ -584,7 +542,6 @@ class ChatState extends State<Chat> {
 
   @override
   void dispose() {
-    _galleryPageController?.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -596,97 +553,84 @@ class ChatState extends State<Chat> {
           theme: widget.theme,
           child: InheritedL10n(
             l10n: widget.l10n,
-            child: Stack(
-              children: [
-                Container(
-                  color: widget.theme.backgroundColor,
-                  child: Column(
-                    children: [
-                      if (widget.topConfig.showHistory)
-                        Container(
-                          padding: widget.topConfig.padding,
-                          color: Colors.transparent,
-                          child: widget.topConfig.loading
-                              ? SizedBox(
-                                  width: 20.0,
-                                  height: 20.0,
-                                  child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        widget.topConfig.loadingColor),
-                                  ),
-                                )
-                              : SizedBox(
-                                  height: widget.topConfig.height,
-                                  child: TextButton(
-                                    onPressed: () {
-                                      widget.topTapCallBack?.call();
-                                      if (widget.topConfig.scroToTop) {
-                                        _scrollController.jumpTo(0.0);
-                                      }
-                                    },
-                                    style: TextButton.styleFrom(
-                                      padding: EdgeInsets.zero,
-                                      minimumSize: Size(0, 0),
-                                    ),
-                                    child: widget.topConfig.content,
-                                  ),
-                                ),
+            child: Container(
+              color: widget.theme.backgroundColor,
+              child: Column(
+                children: [
+                  if (widget.topConfig.showHistory)
+                    Container(
+                      padding: widget.topConfig.padding,
+                      color: Colors.transparent,
+                      child: widget.topConfig.loading
+                          ? SizedBox(
+                        width: 20.0,
+                        height: 20.0,
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              widget.topConfig.loadingColor),
                         ),
-                      Flexible(
-                        child: widget.messages.isEmpty
-                            ? SizedBox.expand(
-                                child: _emptyStateBuilder(),
-                              )
-                            : GestureDetector(
-                                onTap: () {
-                                  if (!widget.isMultiChoose) {
-                                    FocusManager.instance.primaryFocus?.unfocus();
-                                    widget.onBackgroundTap?.call(false);
-                                  }
-                                },
-                                child: LayoutBuilder(
-                                  builder: (
-                                    BuildContext context,
-                                    BoxConstraints constraints,
-                                  ) =>
-                                      ChatList(
-                                        bottomWidget: widget.listBottomWidget,
-                                        bubbleRtlAlignment: widget.bubbleRtlAlignment!,
-                                        onBackgroundTap: widget.onBackgroundTap,
-                                        isLastPage: widget.isLastPage,
-                                        itemBuilder: (Object item, int? index) => _messageBuilder(item, constraints, index),
-                                        items: _chatMessages,
-                                        keyboardDismissBehavior: widget.keyboardDismissBehavior,
-                                        onEndReached: widget.onEndReached,
-                                        onEndReachedThreshold: widget.onEndReachedThreshold,
-                                        scrollController: _scrollController,
-                                        scrollPhysics: widget.scrollPhysics,
-                                        typingIndicatorOptions: widget.typingIndicatorOptions,
-                                        useTopSafeAreaInset: widget.useTopSafeAreaInset ?? isMobile,
-                                      ),
-                                ),
-                              ),
-                      ),
-                      widget.customBottomWidget ??
-                          Input(
-                            isAttachmentUploading: widget.isAttachmentUploading,
-                            onAttachmentPressed: widget.onAttachmentPressed,
-                            onSendPressed: widget.onSendPressed,
-                            options: widget.inputOptions,
+                      )
+                          : SizedBox(
+                        height: widget.topConfig.height,
+                        child: TextButton(
+                          onPressed: () {
+                            widget.topTapCallBack?.call();
+                            if (widget.topConfig.scroToTop) {
+                              _scrollController.jumpTo(0.0);
+                            }
+                          },
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: Size(0, 0),
                           ),
-                    ],
+                          child: widget.topConfig.content,
+                        ),
+                      ),
+                    ),
+                  Flexible(
+                    child: widget.messages.isEmpty
+                        ? SizedBox.expand(
+                      child: _emptyStateBuilder(),
+                    )
+                        : GestureDetector(
+                      onTap: () {
+                        if (!widget.isMultiChoose) {
+                          FocusManager.instance.primaryFocus?.unfocus();
+                          widget.onBackgroundTap?.call(false);
+                        }
+                      },
+                      child: LayoutBuilder(
+                        builder: (
+                            BuildContext context,
+                            BoxConstraints constraints,
+                            ) =>
+                            ChatList(
+                              bottomWidget: widget.listBottomWidget,
+                              bubbleRtlAlignment: widget.bubbleRtlAlignment!,
+                              onBackgroundTap: widget.onBackgroundTap,
+                              isLastPage: widget.isLastPage,
+                              itemBuilder: (Object item, int? index) => _messageBuilder(item, constraints, index),
+                              items: _chatMessages,
+                              keyboardDismissBehavior: widget.keyboardDismissBehavior,
+                              onEndReached: widget.onEndReached,
+                              onEndReachedThreshold: widget.onEndReachedThreshold,
+                              scrollController: _scrollController,
+                              scrollPhysics: widget.scrollPhysics,
+                              typingIndicatorOptions: widget.typingIndicatorOptions,
+                              useTopSafeAreaInset: widget.useTopSafeAreaInset ?? isMobile,
+                            ),
+                      ),
+                    ),
                   ),
-                ),
-                if (_isImageViewVisible)
-                  ImageGallery(
-                    imageHeaders: widget.imageHeaders,
-                    imageProviderBuilder: widget.imageProviderBuilder,
-                    images: _gallery,
-                    pageController: _galleryPageController!,
-                    onClosePressed: _onCloseGalleryPressed,
-                    options: widget.imageGalleryOptions,
-                  ),
-              ],
+                  widget.customBottomWidget ??
+                      Input(
+                        isAttachmentUploading: widget.isAttachmentUploading,
+                        onAttachmentPressed: widget.onAttachmentPressed,
+                        onSendPressed: widget.onSendPressed,
+                        options: widget.inputOptions,
+                      ),
+                ],
+              ),
             ),
           ),
         ),
