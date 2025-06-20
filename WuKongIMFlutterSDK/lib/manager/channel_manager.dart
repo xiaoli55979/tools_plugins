@@ -76,6 +76,10 @@ class WKChannelManager {
     ChannelDB.shared.saveOrUpdate(channel);
   }
 
+  Future<int?> deletePersonData() async {
+    return await ChannelDB.shared.deleteByChannelTypePerson();
+  }
+
   _updateChannel(WKChannel channel) {
     bool isAdd = true;
     for (int i = 0, size = _list.length; i < size; i++) {

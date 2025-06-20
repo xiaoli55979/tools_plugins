@@ -50,6 +50,16 @@ class ChannelDB {
     }
   }
 
+  Future<int?> deleteByChannelTypePerson() async {
+    return await WKDBHelper.shared.getDB()?.transaction((txn) async {
+      return await txn.delete(
+        WKDBConst.tableChannel,
+        where: 'channel_type = ?',
+        whereArgs: [1],
+      );
+    });
+  }
+
   saveOrUpdate(WKChannel channel) async {
     insert(channel);
   }
