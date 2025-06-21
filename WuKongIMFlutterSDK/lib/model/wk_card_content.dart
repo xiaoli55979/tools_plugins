@@ -13,7 +13,7 @@ class WKCardContent extends WKMessageContent {
   WKMessageContent decodeJson(Map<String, dynamic> json) {
     name = readString(json, 'name');
     uid = readString(json, 'uid');
-    vercode = readString(json, 'uid');
+    vercode = readString(json, 'vercode');
     return this;
   }
 
